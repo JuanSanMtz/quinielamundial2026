@@ -17,7 +17,7 @@ body{
 }
 
 header{
-  background:#1e3c72;
+  background:#7f1d1d;
   color:white;
   text-align:center;
   padding:18px;
@@ -26,130 +26,82 @@ header{
 }
 
 .container{
-  max-width:700px;
+  max-width:900px;
   margin:auto;
-  padding:15px;
+  padding:20px;
 }
 
 .card{
   background:white;
-  padding:15px;
+  padding:20px;
   border-radius:12px;
   margin-bottom:20px;
   box-shadow:0 2px 6px rgba(0,0,0,.1);
 }
 
-input{
-  width:100%;
-  padding:10px;
-  border-radius:8px;
-  border:1px solid #ccc;
-  margin-bottom:10px;
-  box-sizing:border-box;
+h2{
+  margin-top:0;
+  color:#7f1d1d;
 }
 
-button.guardar{
-  width:100%;
-  padding:14px;
-  margin-top:10px;
-  background:#1e3c72;
-  color:white;
-  border:none;
-  border-radius:10px;
-  font-size:16px;
-  cursor:pointer;
-}
-
-button.guardar:hover{
-  background:#294f96;
-}
-
-.grupo-header{
-  display:flex;
-  justify-content:space-between;
-  align-items:center;
-  margin-bottom:20px;
-}
-
-.grupo-title{
-  font-size:24px;
-  font-weight:bold;
-  color:#1e3c72;
-}
-
-.nav-btn{
-  width:45px;
-  height:45px;
-  border:none;
-  border-radius:50%;
-  background:#1e3c72;
-  color:white;
-  font-size:22px;
-  cursor:pointer;
-}
-
-.jornada{
-  background:#dfe7f5;
-  padding:10px;
-  border-radius:8px;
-  margin-top:15px;
-  margin-bottom:10px;
-  font-weight:bold;
+.grupo{
+  margin-bottom:25px;
 }
 
 .partido{
   display:grid;
-  grid-template-columns:1fr 60px 60px 1fr;
+  grid-template-columns:1fr 70px 70px 1fr;
   gap:10px;
   align-items:center;
-  padding:12px 0;
-  border-bottom:1px solid #eee;
+  margin-bottom:10px;
 }
 
 .team{
   text-align:center;
   font-weight:bold;
-  font-size:14px;
 }
 
-.marcador{
-  text-align:center;
-}
-
-.info{
-  background:#fff4d6;
-  border:1px solid #ffe08a;
-  padding:12px;
+input{
+  padding:10px;
   border-radius:8px;
-  margin-bottom:15px;
-}
-
-.indicadores{
+  border:1px solid #ccc;
   text-align:center;
-  margin-top:15px;
 }
 
-.dot{
-  display:inline-block;
-  width:10px;
-  height:10px;
-  border-radius:50%;
-  background:#ccc;
-  margin:4px;
+button{
+  width:100%;
+  padding:14px;
+  border:none;
+  border-radius:10px;
+  color:white;
+  font-size:16px;
+  cursor:pointer;
+  margin-top:10px;
 }
 
-.dot.active{
-  background:#1e3c72;
+.btn-guardar{
+  background:#1d4ed8;
 }
 
-.admin-ok{
-  background:#dcfce7;
-  color:#166534;
-  padding:12px;
-  border-radius:8px;
-  margin-bottom:15px;
-  text-align:center;
-  font-weight:bold;
+.btn-ranking{
+  background:#15803d;
+}
+
+.btn-reset{
+  background:#dc2626;
+}
+
+.btn-user{
+  background:#ea580c;
+}
+
+button:hover{
+  opacity:.9;
+}
+
+.admin-tools{
+  display:grid;
+  gap:15px;
 }
 
 </style>
@@ -159,101 +111,28 @@ button.guardar:hover{
 <body>
 
 <header>
-🔐 Admin Quiniela Mundial 2026
+🛠️ Admin Mundial 2026
 </header>
 
 <div class="container">
-
-<!-- LOGIN -->
-
-<div
-  class="card"
-  id="loginCard"
->
-
-<h2>🔐 Acceso Admin</h2>
-
-<input
-  id="user"
-  placeholder="Usuario"
->
-
-<input
-  id="pass"
-  type="password"
-  placeholder="Contraseña"
->
-
-<button
-  class="guardar"
-  onclick="login()"
->
-Entrar
-</button>
-
-</div>
-
-<!-- PANEL -->
-
-<div
-  id="panelAdmin"
-  style="display:none;"
->
-
-<div
-  id="estadoAdmin"
-></div>
 
 <!-- RESULTADOS -->
 
 <div class="card">
 
-<div class="info">
-🏆 Captura resultados oficiales y calcula ranking.
-</div>
+<h2>⚽ Captura Resultados</h2>
 
-<div class="grupo-header">
+<div id="resultados"></div>
 
 <button
-  class="nav-btn"
-  onclick="grupoAnterior()"
->
-<
-</button>
-
-<div
-  class="grupo-title"
-  id="grupoTitulo"
->
-Grupo A
-</div>
-
-<button
-  class="nav-btn"
-  onclick="grupoSiguiente()"
->
->
-</button>
-
-</div>
-
-<div id="partidos"></div>
-
-<div
-  class="indicadores"
-  id="indicadores"
-></div>
-
-<button
-  class="guardar"
+  class="btn-guardar"
   onclick="guardarResultados()"
 >
 💾 Guardar Resultados
 </button>
 
 <button
-  class="guardar"
-  style="background:#2e7d32;"
+  class="btn-ranking"
   onclick="calcularPuntos()"
 >
 ⚡ Calcular Ranking
@@ -261,16 +140,38 @@ Grupo A
 
 </div>
 
-<!-- RESET -->
+<!-- HERRAMIENTAS -->
 
 <div class="card">
 
+<h2>🧨 Herramientas Admin</h2>
+
+<div class="admin-tools">
+
+<input
+  id="usuarioEliminar"
+  placeholder="Nombre usuario a eliminar"
+/>
+
 <button
-  class="guardar"
-  style="background:#c62828;"
-  onclick="resetearDB()"
+  class="btn-user"
+  onclick="eliminarUsuario()"
 >
-🗑️ Reiniciar Quiniela
+❌ Eliminar Usuario
+</button>
+
+<button
+  class="btn-reset"
+  onclick="resetRanking()"
+>
+🏆 Reiniciar Ranking
+</button>
+
+<button
+  class="btn-reset"
+  onclick="resetMundial()"
+>
+🧨 Reiniciar Mundial Completo
 </button>
 
 </div>
@@ -284,44 +185,7 @@ Grupo A
 <script>
 
 /* =========================================
-   LOGIN
-========================================= */
-
-function login(){
-
-  const u =
-    document.getElementById("user").value;
-
-  const p =
-    document.getElementById("pass").value;
-
-  if(
-    u === "admin" &&
-    p === "1234"
-  ){
-
-    document.getElementById(
-      "loginCard"
-    ).style.display = "none";
-
-    document.getElementById(
-      "panelAdmin"
-    ).style.display = "block";
-
-    renderPartidos();
-
-  }else{
-
-    alert(
-      "❌ Credenciales incorrectas"
-    );
-
-  }
-
-}
-
-/* =========================================
-   VARIABLES
+   RENDER RESULTADOS
 ========================================= */
 
 const grupos = [
@@ -329,196 +193,66 @@ const grupos = [
   "G","H","I","J","K","L"
 ];
 
-let indiceGrupo = 0;
-
-/* =========================================
-   RENDER PARTIDOS
-========================================= */
-
-async function renderPartidos(){
-
-  const grupoActual =
-    grupos[indiceGrupo];
-
-  document.getElementById(
-    "grupoTitulo"
-  ).innerHTML =
-    `Grupo ${grupoActual}`;
+function renderResultados(){
 
   let html = "";
 
-  let jornadaActual = "";
+  grupos.forEach((grupo)=>{
 
-  const partidosGrupo =
-    partidos.filter(
-      p => p.grupo === grupoActual
-    );
+    html += `
 
-  partidosGrupo.forEach((p)=>{
+    <div class="grupo">
 
-    if(jornadaActual !== p.jornada){
+      <h3>Grupo ${grupo}</h3>
 
-      jornadaActual = p.jornada;
+    `;
+
+    const partidosGrupo =
+      partidos.filter(
+        p => p.grupo === grupo
+      );
+
+    partidosGrupo.forEach((p)=>{
 
       html += `
 
-      <div class="jornada">
-        Jornada ${jornadaActual}
+      <div class="partido">
+
+        <div class="team">
+          ${p.local}
+        </div>
+
+        <input
+          type="number"
+          id="gl${p.id}"
+          min="0"
+          value="0"
+        >
+
+        <input
+          type="number"
+          id="gv${p.id}"
+          min="0"
+          value="0"
+        >
+
+        <div class="team">
+          ${p.visitante}
+        </div>
+
       </div>
 
       `;
 
-    }
-
-    html += `
-
-    <div class="partido">
-
-      <div class="team">
-        ${p.local}
-      </div>
-
-      <input
-        type="number"
-        class="marcador"
-        id="gl${p.id}"
-        min="0"
-      >
-
-      <input
-        type="number"
-        class="marcador"
-        id="gv${p.id}"
-        min="0"
-      >
-
-      <div class="team">
-        ${p.visitante}
-      </div>
-
-    </div>
-
-    `;
-
-  });
-
-  document.getElementById(
-    "partidos"
-  ).innerHTML = html;
-
-  renderIndicadores();
-
-  cargarResultadosGuardados();
-
-}
-
-/* =========================================
-   CARGAR RESULTADOS
-========================================= */
-
-async function cargarResultadosGuardados(){
-
-  const grupoActual =
-    grupos[indiceGrupo];
-
-  try{
-
-    const res =
-      await fetch(
-
-        `https://quiniela-mundial-juansantos-default-rtdb.firebaseio.com/resultados/${grupoActual}.json`
-
-      );
-
-    const data =
-      await res.json();
-
-    if(!data) return;
-
-    data.forEach((p)=>{
-
-      const gl =
-        document.getElementById(
-          `gl${p.partidoId}`
-        );
-
-      const gv =
-        document.getElementById(
-          `gv${p.partidoId}`
-        );
-
-      if(gl && gv){
-
-        gl.value =
-          p.golesLocal;
-
-        gv.value =
-          p.golesVisitante;
-
-      }
-
     });
 
-  }catch(e){
-
-    console.error(e);
-
-  }
-
-}
-
-/* =========================================
-   INDICADORES
-========================================= */
-
-function renderIndicadores(){
-
-  let html = "";
-
-  grupos.forEach((g,i)=>{
-
-    html += `
-
-    <span class="
-      dot
-      ${i === indiceGrupo ? 'active' : ''}
-    "></span>
-
-    `;
+    html += `</div>`;
 
   });
 
   document.getElementById(
-    "indicadores"
+    "resultados"
   ).innerHTML = html;
-
-}
-
-/* =========================================
-   NAVEGACIÓN
-========================================= */
-
-function grupoSiguiente(){
-
-  if(indiceGrupo < grupos.length - 1){
-
-    indiceGrupo++;
-
-    renderPartidos();
-
-  }
-
-}
-
-function grupoAnterior(){
-
-  if(indiceGrupo > 0){
-
-    indiceGrupo--;
-
-    renderPartidos();
-
-  }
 
 }
 
@@ -528,95 +262,57 @@ function grupoAnterior(){
 
 async function guardarResultados(){
 
-  const grupoActual =
-    grupos[indiceGrupo];
+  try{
 
-  const partidosGrupo =
-    partidos.filter(
-      p => p.grupo === grupoActual
-    );
+    let data = {};
 
-  let resultados = [];
+    grupos.forEach((grupo)=>{
 
-  let incompleto = false;
+      const partidosGrupo =
+        partidos.filter(
+          p => p.grupo === grupo
+        );
 
-  partidosGrupo.forEach((p)=>{
+      data[grupo] = [];
 
-    const gl =
-      document.getElementById(
-        `gl${p.id}`
-      );
+      partidosGrupo.forEach((p)=>{
 
-    const gv =
-      document.getElementById(
-        `gv${p.id}`
-      );
+        const gl =
+          document.getElementById(
+            `gl${p.id}`
+          ).value;
 
-    if(!gl || !gv) return;
+        const gv =
+          document.getElementById(
+            `gv${p.id}`
+          ).value;
 
-    if(
-      gl.value === "" ||
-      gv.value === ""
-    ){
+        data[grupo].push({
 
-      incompleto = true;
+          partidoId:p.id,
 
-      return;
+          golesLocal:
+            parseInt(gl),
 
-    }
+          golesVisitante:
+            parseInt(gv)
 
-    resultados.push({
+        });
 
-      partidoId:p.id,
-
-      grupo:p.grupo,
-
-      local:p.local,
-
-      visitante:p.visitante,
-
-      golesLocal:
-        parseInt(gl.value),
-
-      golesVisitante:
-        parseInt(gv.value)
+      });
 
     });
-
-  });
-
-  if(incompleto){
-
-    alert(
-      "Completa todos los partidos"
-    );
-
-    return;
-
-  }
-
-  try{
 
     await firebaseSet(
 
       firebaseRef(
         db,
-        `resultados/${grupoActual}`
+        "resultados"
       ),
 
-      resultados
+      data
 
     );
-
-    document.getElementById(
-      "estadoAdmin"
-    ).innerHTML = `
-
-    <div class="admin-ok">
-      ✅ Resultados Grupo ${grupoActual} guardados
-    </div>
-
-    `;
 
     alert(
       "🔥 Resultados guardados"
@@ -635,7 +331,7 @@ async function guardarResultados(){
 }
 
 /* =========================================
-   CALCULAR RANKING
+   CALCULAR PUNTOS
 ========================================= */
 
 async function calcularPuntos(){
@@ -689,11 +385,6 @@ async function calcularPuntos(){
         const resultadosGrupo =
           resultados[grupo];
 
-        /* =========================
-           SI NO HAY RESULTADOS
-           NO EVALUAR
-        ========================= */
-
         if(!resultadosGrupo){
 
           continue;
@@ -703,20 +394,16 @@ async function calcularPuntos(){
         pronosticos.forEach((p)=>{
 
           const real =
-          resultadosGrupo.find(
+            resultadosGrupo.find(
 
-          r =>
+              r =>
 
-      Number(r.partidoId) ===
-      Number(p.partidoId)
+                Number(r.partidoId) ===
+                Number(p.partidoId)
 
-  );
+            );
 
           if(!real) return;
-
-          /* =========================
-             EXACTOS
-          ========================= */
 
           if(
 
@@ -729,10 +416,6 @@ async function calcularPuntos(){
             exactos++;
 
           }
-
-          /* =========================
-             GANADOR / EMPATE
-          ========================= */
 
           const resultadoPronostico =
 
@@ -788,7 +471,7 @@ async function calcularPuntos(){
     }
 
     alert(
-      "🔥 Ranking calculado correctamente"
+      "🔥 Ranking calculado"
     );
 
   }catch(e){
@@ -804,43 +487,168 @@ async function calcularPuntos(){
 }
 
 /* =========================================
-   RESET
+   ELIMINAR USUARIO
 ========================================= */
 
-async function resetearDB(){
+async function eliminarUsuario(){
 
-  const ok = confirm(
-    "⚠️ ¿Borrar toda la quiniela?"
-  );
+  const usuario =
+    document.getElementById(
+      "usuarioEliminar"
+    ).value;
+
+  if(!usuario){
+
+    alert(
+      "Escribe usuario"
+    );
+
+    return;
+
+  }
+
+  const ok =
+    confirm(
+
+      `¿Eliminar completamente a ${usuario}?`
+
+    );
 
   if(!ok) return;
 
   try{
 
-    await firebaseSet(
-      firebaseRef(db,"quinielas"),
-      null
+    await firebaseRemove(
+
+      firebaseRef(
+        db,
+        `quinielas/${usuario}`
+      )
+
     );
 
-    await firebaseSet(
-      firebaseRef(db,"resultados"),
-      null
-    );
+    await firebaseRemove(
 
-    await firebaseSet(
-      firebaseRef(db,"ranking"),
-      null
+      firebaseRef(
+        db,
+        `ranking/${usuario}`
+      )
+
     );
 
     alert(
-      "🔥 Quiniela reiniciada"
+      `🔥 Usuario ${usuario} eliminado`
     );
-
-    location.reload();
 
   }catch(e){
 
     console.error(e);
+
+    alert(
+      "❌ Error eliminando usuario"
+    );
+
+  }
+
+}
+
+/* =========================================
+   RESET RANKING
+========================================= */
+
+async function resetRanking(){
+
+  const ok =
+    confirm(
+
+      "¿Eliminar TODO el ranking?"
+
+    );
+
+  if(!ok) return;
+
+  try{
+
+    await firebaseRemove(
+
+      firebaseRef(
+        db,
+        "ranking"
+      )
+
+    );
+
+    alert(
+      "🔥 Ranking reiniciado"
+    );
+
+  }catch(e){
+
+    console.error(e);
+
+    alert(
+      "❌ Error reset ranking"
+    );
+
+  }
+
+}
+
+/* =========================================
+   RESET MUNDIAL
+========================================= */
+
+async function resetMundial(){
+
+  const ok =
+    confirm(
+
+      "⚠️ ESTO BORRARÁ TODO EL MUNDIAL ¿Continuar?"
+
+    );
+
+  if(!ok) return;
+
+  try{
+
+    await firebaseRemove(
+
+      firebaseRef(
+        db,
+        "quinielas"
+      )
+
+    );
+
+    await firebaseRemove(
+
+      firebaseRef(
+        db,
+        "ranking"
+      )
+
+    );
+
+    await firebaseRemove(
+
+      firebaseRef(
+        db,
+        "resultados"
+      )
+
+    );
+
+    alert(
+      "🔥 Mundial reiniciado"
+    );
+
+  }catch(e){
+
+    console.error(e);
+
+    alert(
+      "❌ Error reiniciando"
+    );
 
   }
 
@@ -850,7 +658,7 @@ async function resetearDB(){
    INIT
 ========================================= */
 
-renderIndicadores();
+renderResultados();
 
 </script>
 
@@ -864,7 +672,8 @@ from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
 import {
   getDatabase,
   ref,
-  set
+  set,
+  remove
 }
 from "https://www.gstatic.com/firebasejs/12.13.0/firebase-database.js";
 
@@ -904,6 +713,8 @@ window.db = db;
 window.firebaseRef = ref;
 
 window.firebaseSet = set;
+
+window.firebaseRemove = remove;
 
 </script>
 
