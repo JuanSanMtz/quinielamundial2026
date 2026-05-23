@@ -17,7 +17,7 @@ body{
 }
 
 header{
-  background:#7f1d1d;
+  background:#1e3c72;
   color:white;
   text-align:center;
   padding:18px;
@@ -39,13 +39,32 @@ header{
   box-shadow:0 2px 6px rgba(0,0,0,.1);
 }
 
-h2{
-  margin-top:0;
-  color:#7f1d1d;
+.grupo-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:20px;
 }
 
-.grupo{
-  margin-bottom:25px;
+.grupo-title{
+  font-size:24px;
+  font-weight:bold;
+  color:#1e3c72;
+}
+
+.nav-btn{
+  width:45px;
+  height:45px;
+  border:none;
+  border-radius:50%;
+  background:#1e3c72;
+  color:white;
+  font-size:22px;
+  cursor:pointer;
+}
+
+.nav-btn:hover{
+  background:#294f96;
 }
 
 .partido{
@@ -53,7 +72,8 @@ h2{
   grid-template-columns:1fr 70px 70px 1fr;
   gap:10px;
   align-items:center;
-  margin-bottom:10px;
+  padding:12px 0;
+  border-bottom:1px solid #eee;
 }
 
 .team{
@@ -66,6 +86,7 @@ input{
   border-radius:8px;
   border:1px solid #ccc;
   text-align:center;
+  box-sizing:border-box;
 }
 
 button{
@@ -80,28 +101,56 @@ button{
 }
 
 .btn-guardar{
-  background:#1d4ed8;
+  background:#1e3c72;
 }
 
 .btn-ranking{
   background:#15803d;
 }
 
-.btn-reset{
-  background:#dc2626;
-}
-
 .btn-user{
   background:#ea580c;
+}
+
+.btn-reset{
+  background:#dc2626;
 }
 
 button:hover{
   opacity:.9;
 }
 
-.admin-tools{
+.indicadores{
+  text-align:center;
+  margin-top:15px;
+}
+
+.dot{
+  display:inline-block;
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  background:#ccc;
+  margin:4px;
+}
+
+.dot.active{
+  background:#1e3c72;
+}
+
+.tools-grid{
   display:grid;
   gap:15px;
+}
+
+.alert-box{
+  background:#fee2e2;
+  border:1px solid #fecaca;
+  color:#991b1b;
+  padding:12px;
+  border-radius:10px;
+  margin-top:15px;
+  font-size:14px;
 }
 
 </style>
@@ -120,15 +169,43 @@ button:hover{
 
 <div class="card">
 
-<h2>⚽ Captura Resultados</h2>
+<div class="grupo-header">
 
-<div id="resultados"></div>
+<button
+  class="nav-btn"
+  onclick="grupoAnterior()"
+>
+<
+</button>
+
+<div
+  class="grupo-title"
+  id="grupoTitulo"
+>
+Grupo A
+</div>
+
+<button
+  class="nav-btn"
+  onclick="grupoSiguiente()"
+>
+>
+</button>
+
+</div>
+
+<div id="partidos"></div>
+
+<div
+  class="indicadores"
+  id="indicadores"
+></div>
 
 <button
   class="btn-guardar"
-  onclick="guardarResultados()"
+  onclick="guardarResultadosGrupo()"
 >
-💾 Guardar Resultados
+💾 Guardar Resultados Grupo
 </button>
 
 <button
@@ -146,7 +223,7 @@ button:hover{
 
 <h2>🧨 Herramientas Admin</h2>
 
-<div class="admin-tools">
+<div class="tools-grid">
 
 <input
   id="usuarioEliminar"
@@ -167,6 +244,11 @@ button:hover{
 🏆 Reiniciar Ranking
 </button>
 
+<div class="alert-box">
+⚠️ Reiniciar Mundial eliminará:
+quinielas, ranking y resultados.
+</div>
+
 <button
   class="btn-reset"
   onclick="resetMundial()"
@@ -185,7 +267,7 @@ button:hover{
 <script>
 
 /* =========================================
-   RENDER RESULTADOS
+   VARIABLES
 ========================================= */
 
 const grupos = [
@@ -193,111 +275,167 @@ const grupos = [
   "G","H","I","J","K","L"
 ];
 
-function renderResultados(){
+let indiceGrupo = 0;
+
+/* =========================================
+   RENDER PARTIDOS
+========================================= */
+
+function renderPartidos(){
+
+  const grupoActual =
+    grupos[indiceGrupo];
+
+  document.getElementById(
+    "grupoTitulo"
+  ).innerHTML =
+    `Grupo ${grupoActual}`;
 
   let html = "";
 
-  grupos.forEach((grupo)=>{
+  const partidosGrupo =
+    partidos.filter(
+      p => p.grupo === grupoActual
+    );
+
+  partidosGrupo.forEach((p)=>{
 
     html += `
 
-    <div class="grupo">
+    <div class="partido">
 
-      <h3>Grupo ${grupo}</h3>
-
-    `;
-
-    const partidosGrupo =
-      partidos.filter(
-        p => p.grupo === grupo
-      );
-
-    partidosGrupo.forEach((p)=>{
-
-      html += `
-
-      <div class="partido">
-
-        <div class="team">
-          ${p.local}
-        </div>
-
-        <input
-          type="number"
-          id="gl${p.id}"
-          min="0"
-          value="0"
-        >
-
-        <input
-          type="number"
-          id="gv${p.id}"
-          min="0"
-          value="0"
-        >
-
-        <div class="team">
-          ${p.visitante}
-        </div>
-
+      <div class="team">
+        ${p.local}
       </div>
 
-      `;
+      <input
+        type="number"
+        id="gl${p.id}"
+        min="0"
+        value="0"
+      >
 
-    });
+      <input
+        type="number"
+        id="gv${p.id}"
+        min="0"
+        value="0"
+      >
 
-    html += `</div>`;
+      <div class="team">
+        ${p.visitante}
+      </div>
+
+    </div>
+
+    `;
 
   });
 
   document.getElementById(
-    "resultados"
+    "partidos"
+  ).innerHTML = html;
+
+  renderIndicadores();
+
+  cargarResultadosGrupo();
+
+}
+
+/* =========================================
+   INDICADORES
+========================================= */
+
+function renderIndicadores(){
+
+  let html = "";
+
+  grupos.forEach((g,i)=>{
+
+    html += `
+
+    <span class="
+      dot
+      ${i === indiceGrupo ? 'active' : ''}
+    "></span>
+
+    `;
+
+  });
+
+  document.getElementById(
+    "indicadores"
   ).innerHTML = html;
 
 }
 
 /* =========================================
-   GUARDAR RESULTADOS
+   NAVEGACIÓN
 ========================================= */
 
-async function guardarResultados(){
+function grupoSiguiente(){
+
+  if(indiceGrupo < grupos.length - 1){
+
+    indiceGrupo++;
+
+    renderPartidos();
+
+  }
+
+}
+
+function grupoAnterior(){
+
+  if(indiceGrupo > 0){
+
+    indiceGrupo--;
+
+    renderPartidos();
+
+  }
+
+}
+
+/* =========================================
+   GUARDAR RESULTADOS GRUPO
+========================================= */
+
+async function guardarResultadosGrupo(){
 
   try{
 
-    let data = {};
+    const grupoActual =
+      grupos[indiceGrupo];
 
-    grupos.forEach((grupo)=>{
+    const partidosGrupo =
+      partidos.filter(
+        p => p.grupo === grupoActual
+      );
 
-      const partidosGrupo =
-        partidos.filter(
-          p => p.grupo === grupo
-        );
+    let data = [];
 
-      data[grupo] = [];
+    partidosGrupo.forEach((p)=>{
 
-      partidosGrupo.forEach((p)=>{
+      const gl =
+        document.getElementById(
+          `gl${p.id}`
+        ).value;
 
-        const gl =
-          document.getElementById(
-            `gl${p.id}`
-          ).value;
+      const gv =
+        document.getElementById(
+          `gv${p.id}`
+        ).value;
 
-        const gv =
-          document.getElementById(
-            `gv${p.id}`
-          ).value;
+      data.push({
 
-        data[grupo].push({
+        partidoId:p.id,
 
-          partidoId:p.id,
+        golesLocal:
+          parseInt(gl),
 
-          golesLocal:
-            parseInt(gl),
-
-          golesVisitante:
-            parseInt(gv)
-
-        });
+        golesVisitante:
+          parseInt(gv)
 
       });
 
@@ -307,7 +445,7 @@ async function guardarResultados(){
 
       firebaseRef(
         db,
-        "resultados"
+        `resultados/${grupoActual}`
       ),
 
       data
@@ -315,7 +453,7 @@ async function guardarResultados(){
     );
 
     alert(
-      "🔥 Resultados guardados"
+      `🔥 Resultados Grupo ${grupoActual} guardados`
     );
 
   }catch(e){
@@ -325,6 +463,61 @@ async function guardarResultados(){
     alert(
       "❌ Error guardando"
     );
+
+  }
+
+}
+
+/* =========================================
+   CARGAR RESULTADOS
+========================================= */
+
+async function cargarResultadosGrupo(){
+
+  try{
+
+    const grupoActual =
+      grupos[indiceGrupo];
+
+    const res =
+      await fetch(
+
+        `https://quiniela-mundial-juansantos-default-rtdb.firebaseio.com/resultados/${grupoActual}.json`
+
+      );
+
+    const data =
+      await res.json();
+
+    if(!data) return;
+
+    data.forEach((p)=>{
+
+      const gl =
+        document.getElementById(
+          `gl${p.partidoId}`
+        );
+
+      const gv =
+        document.getElementById(
+          `gv${p.partidoId}`
+        );
+
+      if(gl && gv){
+
+        gl.value =
+          p.golesLocal;
+
+        gv.value =
+          p.golesVisitante;
+
+      }
+
+    });
+
+  }catch(e){
+
+    console.error(e);
 
   }
 
@@ -658,7 +851,7 @@ async function resetMundial(){
    INIT
 ========================================= */
 
-renderResultados();
+renderPartidos();
 
 </script>
 
