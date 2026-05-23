@@ -687,7 +687,18 @@ async function calcularPuntos(){
           gruposUsuario[grupo].pronosticos || [];
 
         const resultadosGrupo =
-          resultados[grupo] || [];
+          resultados[grupo];
+
+        /* =========================
+           SI NO HAY RESULTADOS
+           NO EVALUAR
+        ========================= */
+
+        if(!resultadosGrupo){
+
+          continue;
+
+        }
 
         pronosticos.forEach((p)=>{
 
@@ -699,7 +710,7 @@ async function calcularPuntos(){
           if(!real) return;
 
           /* =========================
-             MARCADOR EXACTO
+             EXACTOS
           ========================= */
 
           if(
@@ -772,7 +783,7 @@ async function calcularPuntos(){
     }
 
     alert(
-      "🔥 Ranking calculado"
+      "🔥 Ranking calculado correctamente"
     );
 
   }catch(e){
