@@ -159,12 +159,36 @@ button.guardar:hover{
   font-weight:bold;
 }
 
-.resumen{
-  background:#f8fafc;
-  padding:12px;
+.panel-usuario{
+  background:#eff6ff;
+  border:1px solid #bfdbfe;
   border-radius:10px;
-  margin-top:15px;
-  border:1px solid #ddd;
+  padding:15px;
+}
+
+.panel-item{
+  display:flex;
+  justify-content:space-between;
+  padding:10px 0;
+  border-bottom:1px solid #dbeafe;
+}
+
+.detalle-item{
+  display:flex;
+  justify-content:space-between;
+  padding:10px 0;
+  border-bottom:1px solid #eee;
+  font-size:14px;
+}
+
+.ok{
+  color:#15803d;
+  font-weight:bold;
+}
+
+.bad{
+  color:#dc2626;
+  font-weight:bold;
 }
 
 </style>
@@ -191,8 +215,42 @@ button.guardar:hover{
   oninput="
     guardarCacheUsuario();
     renderPartidos();
+    cargarMiPanel();
   "
 />
+
+</div>
+
+<!-- MI PANEL -->
+
+<div class="card">
+
+<h2>📊 Mi Quiniela</h2>
+
+<div id="panelUsuario">
+
+<div class="panel-usuario">
+
+<div class="panel-item">
+<div>🏆 Puntos</div>
+<div>0</div>
+</div>
+
+<div class="panel-item">
+<div>⭐ Exactos</div>
+<div>0</div>
+</div>
+
+<div class="panel-item">
+<div>📈 Posición</div>
+<div>#-</div>
+</div>
+
+</div>
+
+</div>
+
+<div id="detalleUsuario"></div>
 
 </div>
 
@@ -364,6 +422,204 @@ function recuperarCacheGrupo(){
 }
 
 /* =========================================
+   PANEL USUARIO
+========================================= */
+
+async function cargarMiPanel(){
+
+  const usuario =
+    document.getElementById(
+      "usuario"
+    ).value;
+
+  if(!usuario) return;
+
+  try{
+
+    const resRanking =
+      await fetch(
+
+        "https://quiniela-mundial-juansantos-default-rtdb.firebaseio.com/ranking.json"
+
+      );
+
+    const rankingData =
+      await resRanking.json();
+
+    if(!rankingData) return;
+
+    const ranking =
+      Object.values(rankingData);
+
+    ranking.sort((a,b)=>{
+
+      if(b.puntos !== a.puntos){
+
+        return b.puntos - a.puntos;
+
+      }
+
+      return b.exactos - a.exactos;
+
+    });
+
+    const usuarioRanking =
+      ranking.find(
+        r => r.usuario === usuario
+      );
+
+    let posicion = "-";
+
+    ranking.forEach((r,i)=>{
+
+      if(r.usuario === usuario){
+
+        posicion = i + 1;
+
+      }
+
+    });
+
+    if(usuarioRanking){
+
+      document.getElementById(
+        "panelUsuario"
+      ).innerHTML = `
+
+      <div class="panel-usuario">
+
+        <div class="panel-item">
+          <div>🏆 Puntos</div>
+          <div>${usuarioRanking.puntos}</div>
+        </div>
+
+        <div class="panel-item">
+          <div>⭐ Exactos</div>
+          <div>${usuarioRanking.exactos}</div>
+        </div>
+
+        <div class="panel-item">
+          <div>📈 Posición</div>
+          <div>#${posicion}</div>
+        </div>
+
+      </div>
+
+      `;
+
+    }
+
+    /* =========================
+       DETALLE PARTIDOS
+    ========================= */
+
+    const resQuiniela =
+      await fetch(
+
+        `https://quiniela-mundial-juansantos-default-rtdb.firebaseio.com/quinielas/${usuario}.json`
+
+      );
+
+    const quiniela =
+      await resQuiniela.json();
+
+    const resResultados =
+      await fetch(
+
+        "https://quiniela-mundial-juansantos-default-rtdb.firebaseio.com/resultados.json"
+
+      );
+
+    const resultados =
+      await resResultados.json();
+
+    let html = "";
+
+    if(
+      quiniela &&
+      resultados
+    ){
+
+      for(const grupo in quiniela.grupos){
+
+        const pronosticos =
+          quiniela.grupos[grupo]
+          .pronosticos || [];
+
+        const resultadosGrupo =
+          resultados[grupo];
+
+        if(!resultadosGrupo){
+
+          continue;
+
+        }
+
+        pronosticos.forEach((p)=>{
+
+          const real =
+            resultadosGrupo.find(
+
+              r =>
+
+                Number(r.partidoId) ===
+                Number(p.partidoId)
+
+            );
+
+          if(!real) return;
+
+          const exacto =
+
+            p.golesLocal ===
+            real.golesLocal &&
+
+            p.golesVisitante ===
+            real.golesVisitante;
+
+          html += `
+
+          <div class="detalle-item">
+
+            <div>
+
+              ${p.local}
+              ${p.golesLocal}-${p.golesVisitante}
+              ${p.visitante}
+
+            </div>
+
+            <div class="
+              ${exacto ? 'ok' : 'bad'}
+            ">
+
+              ${exacto ? '✅' : '❌'}
+
+            </div>
+
+          </div>
+
+          `;
+
+        });
+
+      }
+
+    }
+
+    document.getElementById(
+      "detalleUsuario"
+    ).innerHTML = html;
+
+  }catch(e){
+
+    console.error(e);
+
+  }
+
+}
+
+/* =========================================
    RENDER PARTIDOS
 ========================================= */
 
@@ -375,10 +631,6 @@ async function renderPartidos(){
     ).value;
 
   if(!usuario){
-
-    alert(
-      "⚠️ Primero escribe tu nombre"
-    );
 
     return;
 
@@ -401,7 +653,7 @@ async function renderPartidos(){
       p => p.grupo === grupoActual
     );
 
-  partidosGrupo.forEach((p,index)=>{
+  partidosGrupo.forEach((p)=>{
 
     if(jornadaActual !== p.jornada){
 
@@ -828,6 +1080,8 @@ async function guardarGrupo(){
 
     cargarRanking();
 
+    cargarMiPanel();
+
     alert(
       `🔥 Grupo ${grupoActual} guardado`
     );
@@ -950,6 +1204,8 @@ window.onload = ()=>{
     ).value = usuario;
 
     renderPartidos();
+
+    cargarMiPanel();
 
   }
 
