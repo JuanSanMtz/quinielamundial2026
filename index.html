@@ -1,0 +1,815 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Quiniela Mundial 2026</title>
+
+<style>
+
+body{
+  font-family:Arial;
+  background:#eef2f7;
+  margin:0;
+}
+
+header{
+  background:#1e3c72;
+  color:white;
+  text-align:center;
+  padding:18px;
+  font-size:24px;
+  font-weight:bold;
+}
+
+.container{
+  max-width:700px;
+  margin:auto;
+  padding:15px;
+}
+
+.card{
+  background:white;
+  padding:15px;
+  border-radius:12px;
+  margin-bottom:20px;
+  box-shadow:0 2px 6px rgba(0,0,0,.1);
+}
+
+input{
+  padding:10px;
+  border-radius:8px;
+  border:1px solid #ccc;
+  box-sizing:border-box;
+}
+
+#usuario{
+  width:100%;
+}
+
+.grupo-header{
+  display:flex;
+  justify-content:space-between;
+  align-items:center;
+  margin-bottom:20px;
+}
+
+.grupo-title{
+  font-size:24px;
+  font-weight:bold;
+  color:#1e3c72;
+}
+
+.nav-btn{
+  width:45px;
+  height:45px;
+  border:none;
+  border-radius:50%;
+  background:#1e3c72;
+  color:white;
+  font-size:22px;
+  cursor:pointer;
+}
+
+.nav-btn:hover{
+  background:#294f96;
+}
+
+.jornada{
+  background:#dfe7f5;
+  padding:10px;
+  border-radius:8px;
+  margin-top:15px;
+  margin-bottom:10px;
+  font-weight:bold;
+}
+
+.partido{
+  display:grid;
+  grid-template-columns:1fr 60px 60px 1fr;
+  gap:10px;
+  align-items:center;
+  padding:12px 0;
+  border-bottom:1px solid #eee;
+}
+
+.team{
+  text-align:center;
+  font-weight:bold;
+  font-size:14px;
+}
+
+.marcador{
+  width:100%;
+  text-align:center;
+}
+
+button.guardar{
+  width:100%;
+  padding:14px;
+  margin-top:20px;
+  background:#1e3c72;
+  color:white;
+  border:none;
+  border-radius:10px;
+  font-size:16px;
+  cursor:pointer;
+}
+
+button.guardar:hover{
+  background:#294f96;
+}
+
+button:disabled{
+  background:#999;
+  cursor:not-allowed;
+}
+
+.ranking-item{
+  display:flex;
+  justify-content:space-between;
+  padding:12px;
+  border-bottom:1px solid #eee;
+}
+
+.indicadores{
+  text-align:center;
+  margin-top:15px;
+}
+
+.dot{
+  display:inline-block;
+  width:10px;
+  height:10px;
+  border-radius:50%;
+  background:#ccc;
+  margin:4px;
+}
+
+.dot.active{
+  background:#1e3c72;
+}
+
+.extra-title{
+  background:#ffedd5;
+  color:#9a3412;
+  padding:10px;
+  border-radius:8px;
+  margin-top:20px;
+  margin-bottom:10px;
+  font-weight:bold;
+  text-align:center;
+}
+
+.lock-msg{
+  background:#e8f5e9;
+  color:#2e7d32;
+  padding:12px;
+  border-radius:8px;
+  margin-top:15px;
+  text-align:center;
+  font-weight:bold;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<header>
+⚽ Quiniela Mundial 2026
+</header>
+
+<div class="container">
+
+<!-- USUARIO -->
+
+<div class="card">
+
+<h2>👤 Participante</h2>
+
+<input
+  id="usuario"
+  placeholder="Escribe tu nombre"
+/>
+
+<div
+  class="lock-msg"
+  id="lockMsg"
+  style="display:none;"
+>
+🔒 Quiniela ya enviada
+</div>
+
+</div>
+
+<!-- PARTIDOS -->
+
+<div class="card">
+
+<div class="grupo-header">
+
+<button
+  class="nav-btn"
+  onclick="grupoAnterior()"
+>
+<
+</button>
+
+<div
+  class="grupo-title"
+  id="grupoTitulo"
+>
+Grupo A
+</div>
+
+<button
+  class="nav-btn"
+  onclick="grupoSiguiente()"
+>
+>
+</button>
+
+</div>
+
+<div id="partidos"></div>
+
+<div id="extras"></div>
+
+<div
+  class="indicadores"
+  id="indicadores"
+></div>
+
+<button
+  class="guardar"
+  id="btnGuardar"
+  onclick="guardarQuiniela()"
+>
+💾 Guardar Quiniela
+</button>
+
+</div>
+
+<!-- RANKING -->
+
+<div class="card">
+
+<h2>🏆 Ranking</h2>
+
+<div id="ranking"></div>
+
+<button
+  class="guardar"
+  onclick="cargarRanking()"
+>
+🔄 Actualizar Ranking
+</button>
+
+</div>
+
+</div>
+
+<script src="partidos.js"></script>
+
+<script>
+
+/* =========================================
+   VARIABLES
+========================================= */
+
+const grupos = [
+  "A","B","C","D","E","F",
+  "G","H","I","J","K","L"
+];
+
+let indiceGrupo = 0;
+
+let memoria = {};
+
+let partidosExtras = [];
+
+let bloqueado = false;
+
+/* =========================================
+   VERIFICAR BLOQUEO
+========================================= */
+
+function verificarBloqueo(){
+
+  const estado =
+    localStorage.getItem(
+      "quinielaEnviada"
+    );
+
+  if(estado === "SI"){
+
+    bloqueado = true;
+
+    document.getElementById(
+      "btnGuardar"
+    ).disabled = true;
+
+    document.getElementById(
+      "lockMsg"
+    ).style.display = "block";
+
+  }
+
+}
+
+/* =========================================
+   CARGAR EXTRAS
+========================================= */
+
+async function cargarExtras(){
+
+  try{
+
+    const res =
+      await fetch(
+        "http://localhost:3000/todos-partidos"
+      );
+
+    const data =
+      await res.json();
+
+    partidosExtras =
+      data.extras || [];
+
+    renderExtras();
+
+  }catch(e){
+
+    console.error(e);
+
+  }
+
+}
+
+/* =========================================
+   RENDER EXTRAS
+========================================= */
+
+function renderExtras(){
+
+  let html = "";
+
+  partidosExtras.forEach((p)=>{
+
+    html += `
+
+    <div class="extra-title">
+      ⚔️ ${p.fase}
+    </div>
+
+    <div class="partido">
+
+      <div class="team">
+        ${p.local}
+      </div>
+
+      <input
+        type="number"
+        class="marcador"
+        id="glExtra${p.id}"
+        min="0"
+        placeholder="0"
+        ${bloqueado ? "disabled" : ""}
+      >
+
+      <input
+        type="number"
+        class="marcador"
+        id="gvExtra${p.id}"
+        min="0"
+        placeholder="0"
+        ${bloqueado ? "disabled" : ""}
+      >
+
+      <div class="team">
+        ${p.visitante}
+      </div>
+
+    </div>
+
+    `;
+
+  });
+
+  document.getElementById(
+    "extras"
+  ).innerHTML = html;
+
+}
+
+/* =========================================
+   RENDER PARTIDOS
+========================================= */
+
+function renderPartidos(){
+
+  const grupoActual =
+    grupos[indiceGrupo];
+
+  document.getElementById(
+    "grupoTitulo"
+  ).innerHTML =
+    `Grupo ${grupoActual}`;
+
+  let html = "";
+
+  let jornadaActual = "";
+
+  const partidosGrupo = partidos.filter(
+    p => p.grupo === grupoActual
+  );
+
+  partidosGroupo = partidosGrupo;
+
+  partidosGrupo.forEach((p)=>{
+
+    if(jornadaActual !== p.jornada){
+
+      jornadaActual = p.jornada;
+
+      html += `
+
+      <div class="jornada">
+        Jornada ${jornadaActual}
+      </div>
+
+      `;
+
+    }
+
+    html += `
+
+    <div class="partido">
+
+      <div class="team">
+        ${p.local}
+      </div>
+
+      <input
+        type="number"
+        class="marcador"
+        id="gl${p.id}"
+        min="0"
+        placeholder="0"
+        ${bloqueado ? "disabled" : ""}
+      >
+
+      <input
+        type="number"
+        class="marcador"
+        id="gv${p.id}"
+        min="0"
+        placeholder="0"
+        ${bloqueado ? "disabled" : ""}
+      >
+
+      <div class="team">
+        ${p.visitante}
+      </div>
+
+    </div>
+
+    `;
+
+  });
+
+  document.getElementById(
+    "partidos"
+  ).innerHTML = html;
+
+  renderIndicadores();
+
+  recuperarTemporal();
+
+}
+
+/* =========================================
+   INDICADORES
+========================================= */
+
+function renderIndicadores(){
+
+  let html = "";
+
+  grupos.forEach((g,i)=>{
+
+    html += `
+
+    <span class="
+      dot
+      ${i === indiceGrupo ? 'active' : ''}
+    "></span>
+
+    `;
+
+  });
+
+  document.getElementById(
+    "indicadores"
+  ).innerHTML = html;
+
+}
+
+/* =========================================
+   MEMORIA
+========================================= */
+
+function guardarTemporal(){
+
+  partidos.forEach((p)=>{
+
+    const gl =
+      document.getElementById(`gl${p.id}`);
+
+    const gv =
+      document.getElementById(`gv${p.id}`);
+
+    if(!gl || !gv) return;
+
+    memoria[p.id] = {
+
+      golesLocal:gl.value,
+
+      golesVisitante:gv.value
+
+    };
+
+  });
+
+}
+
+function recuperarTemporal(){
+
+  partidos.forEach((p)=>{
+
+    const gl =
+      document.getElementById(`gl${p.id}`);
+
+    const gv =
+      document.getElementById(`gv${p.id}`);
+
+    if(!gl || !gv) return;
+
+    if(memoria[p.id]){
+
+      gl.value =
+        memoria[p.id].golesLocal;
+
+      gv.value =
+        memoria[p.id].golesVisitante;
+
+    }
+
+  });
+
+}
+
+/* =========================================
+   NAVEGACIÓN
+========================================= */
+
+function grupoSiguiente(){
+
+  guardarTemporal();
+
+  if(indiceGrupo < grupos.length - 1){
+
+    indiceGrupo++;
+
+    renderPartidos();
+
+  }
+
+}
+
+function grupoAnterior(){
+
+  guardarTemporal();
+
+  if(indiceGrupo > 0){
+
+    indiceGrupo--;
+
+    renderPartidos();
+
+  }
+
+}
+
+/* =========================================
+   GUARDAR QUINIELA
+========================================= */
+
+async function guardarQuiniela(){
+
+  if(bloqueado){
+
+    alert("🔒 Quiniela bloqueada");
+
+    return;
+  }
+
+  guardarTemporal();
+
+  const usuario =
+    document.getElementById("usuario").value;
+
+  if(!usuario){
+
+    alert("Ingresa tu nombre");
+
+    return;
+  }
+
+  let pronosticos = [];
+
+  partidos.forEach((p)=>{
+
+    if(!memoria[p.id]) return;
+
+    const datos = memoria[p.id];
+
+    if(
+      datos.golesLocal === "" ||
+      datos.golesVisitante === ""
+    ){
+      return;
+    }
+
+    pronosticos.push({
+
+      partidoId:p.id,
+
+      golesLocal:parseInt(
+        datos.golesLocal
+      ),
+
+      golesVisitante:parseInt(
+        datos.golesVisitante
+      )
+
+    });
+
+  });
+
+  partidosExtras.forEach((p)=>{
+
+    const gl =
+      document.getElementById(
+        `glExtra${p.id}`
+      );
+
+    const gv =
+      document.getElementById(
+        `gvExtra${p.id}`
+      );
+
+    if(!gl || !gv) return;
+
+    if(gl.value === "" || gv.value === ""){
+      return;
+    }
+
+    pronosticos.push({
+
+      partidoId:p.id,
+
+      golesLocal:parseInt(gl.value),
+
+      golesVisitante:parseInt(gv.value)
+
+    });
+
+  });
+
+  try{
+
+    await fetch(
+      "http://localhost:3000/guardar-quiniela",
+      {
+
+        method:"POST",
+
+        headers:{
+          "Content-Type":"application/json"
+        },
+
+        body:JSON.stringify({
+
+          usuario,
+
+          pronosticos
+
+        })
+
+      }
+    );
+
+    localStorage.setItem(
+      "quinielaEnviada",
+      "SI"
+    );
+
+    bloqueado = true;
+
+    verificarBloqueo();
+
+    renderPartidos();
+
+    renderExtras();
+
+    alert("🔥 Quiniela guardada");
+
+  }catch(e){
+
+    console.error(e);
+
+    alert("❌ Error guardando");
+
+  }
+
+}
+
+/* =========================================
+   RANKING
+========================================= */
+
+async function cargarRanking(){
+
+  try{
+
+    const res =
+      await fetch(
+        "http://localhost:3000/ranking"
+      );
+
+    const ranking =
+      await res.json();
+
+    let html = "";
+
+    ranking.forEach((r,i)=>{
+
+      let emoji = "🏅";
+
+      if(i === 0) emoji = "🥇";
+      if(i === 1) emoji = "🥈";
+      if(i === 2) emoji = "🥉";
+
+      html += `
+
+      <div class="ranking-item">
+
+        <div>
+          ${emoji} ${r.nombre}
+        </div>
+
+        <div>
+          ${r.puntos} pts
+        </div>
+
+      </div>
+
+      `;
+
+    });
+
+    document.getElementById(
+      "ranking"
+    ).innerHTML = html;
+
+  }catch(e){
+
+    console.error(e);
+
+  }
+
+}
+
+/* =========================================
+   INIT
+========================================= */
+
+verificarBloqueo();
+
+renderPartidos();
+
+cargarRanking();
+
+cargarExtras();
+
+</script>
+
+</body>
+
+</html>
