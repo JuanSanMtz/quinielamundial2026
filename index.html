@@ -221,39 +221,6 @@ button.guardar:hover{
 
 </div>
 
-<!-- MI PANEL -->
-
-<div class="card">
-
-<h2>📊 Mi Quiniela</h2>
-
-<div id="panelUsuario">
-
-<div class="panel-usuario">
-
-<div class="panel-item">
-<div>🏆 Puntos</div>
-<div>0</div>
-</div>
-
-<div class="panel-item">
-<div>⭐ Exactos</div>
-<div>0</div>
-</div>
-
-<div class="panel-item">
-<div>📈 Posición</div>
-<div>#-</div>
-</div>
-
-</div>
-
-</div>
-
-<div id="detalleUsuario"></div>
-
-</div>
-
 <!-- PARTIDOS -->
 
 <div class="card">
@@ -308,6 +275,39 @@ Grupo A
 <h2>🏆 Ranking</h2>
 
 <div id="ranking"></div>
+
+</div>
+
+<!-- MI PANEL -->
+
+<div class="card">
+
+<h2>📊 Mi Quiniela</h2>
+
+<div id="panelUsuario">
+
+<div class="panel-usuario">
+
+<div class="panel-item">
+<div>🏆 Puntos</div>
+<div>0</div>
+</div>
+
+<div class="panel-item">
+<div>⭐ Exactos</div>
+<div>0</div>
+</div>
+
+<div class="panel-item">
+<div>📈 Posición</div>
+<div>#-</div>
+</div>
+
+</div>
+
+</div>
+
+<div id="detalleUsuario"></div>
 
 </div>
 
@@ -508,10 +508,6 @@ async function cargarMiPanel(){
       `;
 
     }
-
-    /* =========================
-       DETALLE PARTIDOS
-    ========================= */
 
     const resQuiniela =
       await fetch(
