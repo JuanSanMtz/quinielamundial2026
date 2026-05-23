@@ -550,7 +550,7 @@ function grupoAnterior(){
 }
 
 /* =========================================
-   GUARDAR QUINIELA
+   GUARDAR QUINIELA FIREBASE
 ========================================= */
 
 async function guardarQuiniela(){
@@ -565,6 +565,7 @@ async function guardarQuiniela(){
     alert("Ingresa tu nombre");
 
     return;
+
   }
 
   let pronosticos = [];
@@ -585,6 +586,12 @@ async function guardarQuiniela(){
     pronosticos.push({
 
       partidoId:p.id,
+
+      grupo:p.grupo,
+
+      local:p.local,
+
+      visitante:p.visitante,
 
       golesLocal:parseInt(
         datos.golesLocal
@@ -620,6 +627,12 @@ async function guardarQuiniela(){
 
       partidoId:p.id,
 
+      fase:p.fase,
+
+      local:p.local,
+
+      visitante:p.visitante,
+
       golesLocal:parseInt(gl.value),
 
       golesVisitante:parseInt(gv.value)
@@ -630,28 +643,26 @@ async function guardarQuiniela(){
 
   try{
 
-    await fetch(
-      "https://quinielamundial2026.onrender.com/guardar-quiniela",
+    const nuevaQuiniela =
+      firebasePush(
+        firebaseRef(db,"quinielas")
+      );
+
+    await firebaseSet(
+      nuevaQuiniela,
       {
 
-        method:"POST",
+        usuario,
 
-        headers:{
-          "Content-Type":"application/json"
-        },
+        fecha:
+          new Date().toISOString(),
 
-        body:JSON.stringify({
-
-          usuario,
-
-          pronosticos
-
-        })
+        pronosticos
 
       }
     );
 
-    alert("🔥 Quiniela guardada");
+    alert("🔥 Quiniela guardada en Firebase");
 
   }catch(e){
 
@@ -669,53 +680,10 @@ async function guardarQuiniela(){
 
 async function cargarRanking(){
 
-  try{
-
-    const res =
-      await fetch(
-        "https://quinielamundial2026.onrender.com/ranking"
-      );
-
-    const ranking =
-      await res.json();
-
-    let html = "";
-
-    ranking.forEach((r,i)=>{
-
-      let emoji = "🏅";
-
-      if(i === 0) emoji = "🥇";
-      if(i === 1) emoji = "🥈";
-      if(i === 2) emoji = "🥉";
-
-      html += `
-
-      <div class="ranking-item">
-
-        <div>
-          ${emoji} ${r.nombre}
-        </div>
-
-        <div>
-          ${r.puntos} pts
-        </div>
-
-      </div>
-
-      `;
-
-    });
-
-    document.getElementById(
-      "ranking"
-    ).innerHTML = html;
-
-  }catch(e){
-
-    console.error(e);
-
-  }
+  document.getElementById(
+    "ranking"
+  ).innerHTML =
+    "<div>🔥 Ranking próximamente desde Firebase</div>";
 
 }
 
@@ -728,6 +696,73 @@ renderPartidos();
 cargarRanking();
 
 cargarExtras();
+
+</script>
+
+<!-- FIREBASE -->
+
+<script type="module">
+
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+
+import {
+  getDatabase,
+  ref,
+  push,
+  set
+}
+from "https://www.gstatic.com/firebasejs/12.13.0/firebase-database.js";
+
+/* =========================================
+   FIREBASE CONFIG
+========================================= */
+
+const firebaseConfig = {
+
+  apiKey: "AIzaSyA5b3WcLx8aQhtu2rlJRMhRHvMRH4ygLT8",
+
+  authDomain:
+    "quiniela-mundial-juansantos.firebaseapp.com",
+
+  databaseURL:
+    "https://quiniela-mundial-juansantos-default-rtdb.firebaseio.com",
+
+  projectId:
+    "quiniela-mundial-juansantos",
+
+  storageBucket:
+    "quiniela-mundial-juansantos.firebasestorage.app",
+
+  messagingSenderId:
+    "1023075867439",
+
+  appId:
+    "1:1023075867439:web:404064880c6cd75b801fda"
+
+};
+
+/* =========================================
+   INIT FIREBASE
+========================================= */
+
+const app =
+  initializeApp(firebaseConfig);
+
+const db =
+  getDatabase(app);
+
+/* =========================================
+   GLOBAL
+========================================= */
+
+window.db = db;
+
+window.firebaseRef = ref;
+
+window.firebasePush = push;
+
+window.firebaseSet = set;
 
 </script>
 
