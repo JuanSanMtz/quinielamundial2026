@@ -703,9 +703,14 @@ async function calcularPuntos(){
         pronosticos.forEach((p)=>{
 
           const real =
-            resultadosGrupo.find(
-              r => r.partidoId === p.partidoId
-            );
+          resultadosGrupo.find(
+
+          r =>
+
+      Number(r.partidoId) ===
+      Number(p.partidoId)
+
+  );
 
           if(!real) return;
 
