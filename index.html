@@ -123,11 +123,6 @@ button.guardar:hover{
   background:#294f96;
 }
 
-button:disabled{
-  background:#999;
-  cursor:not-allowed;
-}
-
 .ranking-item{
   display:flex;
   justify-content:space-between;
@@ -164,16 +159,6 @@ button:disabled{
   text-align:center;
 }
 
-.lock-msg{
-  background:#e8f5e9;
-  color:#2e7d32;
-  padding:12px;
-  border-radius:8px;
-  margin-top:15px;
-  text-align:center;
-  font-weight:bold;
-}
-
 </style>
 
 </head>
@@ -196,14 +181,6 @@ button:disabled{
   id="usuario"
   placeholder="Escribe tu nombre"
 />
-
-<div
-  class="lock-msg"
-  id="lockMsg"
-  style="display:none;"
->
-🔒 Quiniela ya enviada
-</div>
 
 </div>
 
@@ -238,6 +215,8 @@ Grupo A
 
 <div id="partidos"></div>
 
+<!-- EXTRAS -->
+
 <div id="extras"></div>
 
 <div
@@ -247,7 +226,6 @@ Grupo A
 
 <button
   class="guardar"
-  id="btnGuardar"
   onclick="guardarQuiniela()"
 >
 💾 Guardar Quiniela
@@ -293,35 +271,6 @@ let memoria = {};
 
 let partidosExtras = [];
 
-let bloqueado = false;
-
-/* =========================================
-   VERIFICAR BLOQUEO
-========================================= */
-
-function verificarBloqueo(){
-
-  const estado =
-    localStorage.getItem(
-      "quinielaEnviada"
-    );
-
-  if(estado === "SI"){
-
-    bloqueado = true;
-
-    document.getElementById(
-      "btnGuardar"
-    ).disabled = true;
-
-    document.getElementById(
-      "lockMsg"
-    ).style.display = "block";
-
-  }
-
-}
-
 /* =========================================
    CARGAR EXTRAS
 ========================================= */
@@ -332,7 +281,7 @@ async function cargarExtras(){
 
     const res =
       await fetch(
-        "http://localhost:3000/todos-partidos"
+        "https://quinielamundial2026.onrender.com/todos-partidos"
       );
 
     const data =
@@ -379,7 +328,6 @@ function renderExtras(){
         id="glExtra${p.id}"
         min="0"
         placeholder="0"
-        ${bloqueado ? "disabled" : ""}
       >
 
       <input
@@ -388,7 +336,6 @@ function renderExtras(){
         id="gvExtra${p.id}"
         min="0"
         placeholder="0"
-        ${bloqueado ? "disabled" : ""}
       >
 
       <div class="team">
@@ -429,8 +376,6 @@ function renderPartidos(){
     p => p.grupo === grupoActual
   );
 
-  partidosGroupo = partidosGrupo;
-
   partidosGrupo.forEach((p)=>{
 
     if(jornadaActual !== p.jornada){
@@ -461,7 +406,6 @@ function renderPartidos(){
         id="gl${p.id}"
         min="0"
         placeholder="0"
-        ${bloqueado ? "disabled" : ""}
       >
 
       <input
@@ -470,7 +414,6 @@ function renderPartidos(){
         id="gv${p.id}"
         min="0"
         placeholder="0"
-        ${bloqueado ? "disabled" : ""}
       >
 
       <div class="team">
@@ -612,13 +555,6 @@ function grupoAnterior(){
 
 async function guardarQuiniela(){
 
-  if(bloqueado){
-
-    alert("🔒 Quiniela bloqueada");
-
-    return;
-  }
-
   guardarTemporal();
 
   const usuario =
@@ -695,7 +631,7 @@ async function guardarQuiniela(){
   try{
 
     await fetch(
-      "http://localhost:3000/guardar-quiniela",
+      "https://quinielamundial2026.onrender.com/guardar-quiniela",
       {
 
         method:"POST",
@@ -714,19 +650,6 @@ async function guardarQuiniela(){
 
       }
     );
-
-    localStorage.setItem(
-      "quinielaEnviada",
-      "SI"
-    );
-
-    bloqueado = true;
-
-    verificarBloqueo();
-
-    renderPartidos();
-
-    renderExtras();
 
     alert("🔥 Quiniela guardada");
 
@@ -750,7 +673,7 @@ async function cargarRanking(){
 
     const res =
       await fetch(
-        "http://localhost:3000/ranking"
+        "https://quinielamundial2026.onrender.com/ranking"
       );
 
     const ranking =
@@ -799,8 +722,6 @@ async function cargarRanking(){
 /* =========================================
    INIT
 ========================================= */
-
-verificarBloqueo();
 
 renderPartidos();
 
