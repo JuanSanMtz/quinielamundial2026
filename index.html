@@ -105,6 +105,7 @@ input{
 .marcador{
   width:100%;
   text-align:center;
+  font-size:16px;
 }
 
 button.guardar{
@@ -158,6 +159,14 @@ button.guardar:hover{
   font-weight:bold;
 }
 
+.resumen{
+  background:#f8fafc;
+  padding:12px;
+  border-radius:10px;
+  margin-top:15px;
+  border:1px solid #ddd;
+}
+
 </style>
 
 </head>
@@ -179,7 +188,7 @@ button.guardar:hover{
 <input
   id="usuario"
   placeholder="Escribe tu nombre"
-  onchange="renderPartidos(); cargarRanking();"
+  oninput="guardarCacheUsuario()"
 />
 
 </div>
@@ -224,7 +233,7 @@ Grupo A
 
 <button
   class="guardar"
-  onclick="guardarGrupo()"
+  onclick="confirmarGuardado()"
 >
 💾 Guardar Grupo
 </button>
@@ -259,10 +268,118 @@ const grupos = [
 let indiceGrupo = 0;
 
 /* =========================================
+   CACHE
+========================================= */
+
+function guardarCacheUsuario(){
+
+  localStorage.setItem(
+    "usuarioQuiniela",
+    document.getElementById(
+      "usuario"
+    ).value
+  );
+
+}
+
+function guardarCacheGrupo(){
+
+  const grupoActual =
+    grupos[indiceGrupo];
+
+  let datos = {};
+
+  const partidosGrupo =
+    partidos.filter(
+      p => p.grupo === grupoActual
+    );
+
+  partidosGrupo.forEach((p)=>{
+
+    const gl =
+      document.getElementById(`gl${p.id}`);
+
+    const gv =
+      document.getElementById(`gv${p.id}`);
+
+    if(!gl || !gv) return;
+
+    datos[p.id] = {
+
+      gl:gl.value,
+      gv:gv.value
+
+    };
+
+  });
+
+  localStorage.setItem(
+
+    `cache_${grupoActual}`,
+
+    JSON.stringify(datos)
+
+  );
+
+}
+
+function recuperarCacheGrupo(){
+
+  const grupoActual =
+    grupos[indiceGrupo];
+
+  const cache =
+    localStorage.getItem(
+      `cache_${grupoActual}`
+    );
+
+  if(!cache) return;
+
+  const datos =
+    JSON.parse(cache);
+
+  Object.keys(datos).forEach((id)=>{
+
+    const gl =
+      document.getElementById(`gl${id}`);
+
+    const gv =
+      document.getElementById(`gv${id}`);
+
+    if(gl && gv){
+
+      gl.value =
+        datos[id].gl;
+
+      gv.value =
+        datos[id].gv;
+
+    }
+
+  });
+
+}
+
+/* =========================================
    RENDER PARTIDOS
 ========================================= */
 
 async function renderPartidos(){
+
+  const usuario =
+    document.getElementById(
+      "usuario"
+    ).value;
+
+  if(!usuario){
+
+    alert(
+      "⚠️ Primero escribe tu nombre"
+    );
+
+    return;
+
+  }
 
   const grupoActual =
     grupos[indiceGrupo];
@@ -281,7 +398,7 @@ async function renderPartidos(){
       p => p.grupo === grupoActual
     );
 
-  partidosGrupo.forEach((p)=>{
+  partidosGrupo.forEach((p,index)=>{
 
     if(jornadaActual !== p.jornada){
 
@@ -310,6 +427,13 @@ async function renderPartidos(){
         class="marcador"
         id="gl${p.id}"
         min="0"
+        value="0"
+        oninput="
+          guardarCacheGrupo();
+          moverSiguiente(
+            'gv${p.id}'
+          );
+        "
       >
 
       <input
@@ -317,6 +441,10 @@ async function renderPartidos(){
         class="marcador"
         id="gv${p.id}"
         min="0"
+        value="0"
+        oninput="
+          guardarCacheGrupo();
+        "
       >
 
       <div class="team">
@@ -335,7 +463,28 @@ async function renderPartidos(){
 
   renderIndicadores();
 
+  recuperarCacheGrupo();
+
   await verificarGrupoGuardado();
+
+}
+
+/* =========================================
+   AUTO FOCUS
+========================================= */
+
+function moverSiguiente(id){
+
+  const el =
+    document.getElementById(id);
+
+  if(el){
+
+    el.focus();
+
+    el.select();
+
+  }
 
 }
 
@@ -367,7 +516,7 @@ function renderIndicadores(){
 }
 
 /* =========================================
-   BLOQUEAR GRUPO
+   BLOQUEAR
 ========================================= */
 
 function bloquearGrupo(){
@@ -389,7 +538,7 @@ function bloquearGrupo(){
 }
 
 /* =========================================
-   DESBLOQUEAR GRUPO
+   DESBLOQUEAR
 ========================================= */
 
 function desbloquearGrupo(){
@@ -411,7 +560,7 @@ function desbloquearGrupo(){
 }
 
 /* =========================================
-   VERIFICAR SI YA EXISTE
+   VERIFICAR FIREBASE
 ========================================= */
 
 async function verificarGrupoGuardado(){
@@ -498,6 +647,8 @@ async function verificarGrupoGuardado(){
 
 function grupoSiguiente(){
 
+  guardarCacheGrupo();
+
   if(indiceGrupo < grupos.length - 1){
 
     indiceGrupo++;
@@ -510,6 +661,8 @@ function grupoSiguiente(){
 
 function grupoAnterior(){
 
+  guardarCacheGrupo();
+
   if(indiceGrupo > 0){
 
     indiceGrupo--;
@@ -521,7 +674,58 @@ function grupoAnterior(){
 }
 
 /* =========================================
-   GUARDAR GRUPO
+   CONFIRMAR
+========================================= */
+
+function confirmarGuardado(){
+
+  const grupoActual =
+    grupos[indiceGrupo];
+
+  const partidosGrupo =
+    partidos.filter(
+      p => p.grupo === grupoActual
+    );
+
+  let resumen = `Grupo ${grupoActual}\n\n`;
+
+  partidosGrupo.forEach((p)=>{
+
+    const gl =
+      document.getElementById(
+        `gl${p.id}`
+      ).value;
+
+    const gv =
+      document.getElementById(
+        `gv${p.id}`
+      ).value;
+
+    resumen +=
+
+      `${p.local} ${gl}-${gv} ${p.visitante}\n`;
+
+  });
+
+  const ok =
+    confirm(
+
+      resumen +
+
+      `\n¿Confirmar grupo?`
+
+    );
+
+  if(ok){
+
+    guardarGrupo();
+
+  }
+
+}
+
+/* =========================================
+   GUARDAR
 ========================================= */
 
 async function guardarGrupo(){
@@ -551,8 +755,6 @@ async function guardarGrupo(){
 
   let pronosticos = [];
 
-  let incompleto = false;
-
   partidosGrupo.forEach((p)=>{
 
     const gl =
@@ -564,19 +766,6 @@ async function guardarGrupo(){
       document.getElementById(
         `gv${p.id}`
       );
-
-    if(!gl || !gv) return;
-
-    if(
-      gl.value === "" ||
-      gv.value === ""
-    ){
-
-      incompleto = true;
-
-      return;
-
-    }
 
     pronosticos.push({
 
@@ -597,16 +786,6 @@ async function guardarGrupo(){
     });
 
   });
-
-  if(incompleto){
-
-    alert(
-      "Completa todos los partidos del grupo"
-    );
-
-    return;
-
-  }
 
   try{
 
@@ -629,6 +808,10 @@ async function guardarGrupo(){
     );
 
     bloquearGrupo();
+
+    localStorage.removeItem(
+      `cache_${grupoActual}`
+    );
 
     document.getElementById(
       "estadoGrupo"
@@ -693,21 +876,13 @@ async function cargarRanking(){
       const ranking =
         Object.values(data);
 
-      /* =========================
-         ORDENAR
-      ========================= */
-
       ranking.sort((a,b)=>{
-
-        /* PRIMERO PUNTOS */
 
         if(b.puntos !== a.puntos){
 
           return b.puntos - a.puntos;
 
         }
-
-        /* LUEGO EXACTOS */
 
         return b.exactos - a.exactos;
 
@@ -758,9 +933,26 @@ async function cargarRanking(){
    INIT
 ========================================= */
 
-renderPartidos();
+window.onload = ()=>{
 
-cargarRanking();
+  const usuario =
+    localStorage.getItem(
+      "usuarioQuiniela"
+    );
+
+  if(usuario){
+
+    document.getElementById(
+      "usuario"
+    ).value = usuario;
+
+    renderPartidos();
+
+  }
+
+  cargarRanking();
+
+};
 
 </script>
 
