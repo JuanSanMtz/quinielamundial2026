@@ -188,7 +188,10 @@ button.guardar:hover{
 <input
   id="usuario"
   placeholder="Escribe tu nombre"
-  oninput="guardarCacheUsuario()"
+  oninput="
+    guardarCacheUsuario();
+    renderPartidos();
+  "
 />
 
 </div>
