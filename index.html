@@ -659,7 +659,7 @@ async function guardarGrupo(){
 }
 
 /* =========================================
-   RANKING REAL
+   RANKING
 ========================================= */
 
 async function cargarRanking(){
@@ -693,9 +693,25 @@ async function cargarRanking(){
       const ranking =
         Object.values(data);
 
-      ranking.sort(
-        (a,b)=> b.puntos - a.puntos
-      );
+      /* =========================
+         ORDENAR
+      ========================= */
+
+      ranking.sort((a,b)=>{
+
+        /* PRIMERO PUNTOS */
+
+        if(b.puntos !== a.puntos){
+
+          return b.puntos - a.puntos;
+
+        }
+
+        /* LUEGO EXACTOS */
+
+        return b.exactos - a.exactos;
+
+      });
 
       ranking.forEach((r,i)=>{
 
@@ -715,6 +731,7 @@ async function cargarRanking(){
 
           <div>
             ${r.puntos} pts
+            ⭐ ${r.exactos}
           </div>
 
         </div>

@@ -209,7 +209,7 @@ Entrar
 <div class="card">
 
 <div class="info">
-🏆 Captura resultados oficiales y calcula puntos.
+🏆 Captura resultados oficiales y calcula ranking.
 </div>
 
 <div class="grupo-header">
@@ -256,12 +256,12 @@ Grupo A
   style="background:#2e7d32;"
   onclick="calcularPuntos()"
 >
-⚡ Calcular Puntos
+⚡ Calcular Ranking
 </button>
 
 </div>
 
-<!-- RESETEAR -->
+<!-- RESET -->
 
 <div class="card">
 
@@ -349,9 +349,10 @@ async function renderPartidos(){
 
   let jornadaActual = "";
 
-  const partidosGrupo = partidos.filter(
-    p => p.grupo === grupoActual
-  );
+  const partidosGrupo =
+    partidos.filter(
+      p => p.grupo === grupoActual
+    );
 
   partidosGrupo.forEach((p)=>{
 
@@ -634,7 +635,7 @@ async function guardarResultados(){
 }
 
 /* =========================================
-   CALCULAR PUNTOS
+   CALCULAR RANKING
 ========================================= */
 
 async function calcularPuntos(){
@@ -675,6 +676,8 @@ async function calcularPuntos(){
 
       let puntos = 0;
 
+      let exactos = 0;
+
       const gruposUsuario =
         quinielas[usuario].grupos || {};
 
@@ -695,7 +698,9 @@ async function calcularPuntos(){
 
           if(!real) return;
 
-          /* EXACTO = 3 */
+          /* =========================
+             MARCADOR EXACTO
+          ========================= */
 
           if(
 
@@ -705,41 +710,39 @@ async function calcularPuntos(){
 
           ){
 
-            puntos += 3;
+            exactos++;
 
           }
 
-          /* GANADOR = 1 */
+          /* =========================
+             GANADOR / EMPATE
+          ========================= */
 
-          else{
+          const resultadoPronostico =
 
-            const ganadorPronostico =
+            p.golesLocal > p.golesVisitante
+            ? "L"
 
-              p.golesLocal > p.golesVisitante
-              ? "L"
+            : p.golesLocal < p.golesVisitante
+            ? "V"
 
-              : p.golesLocal < p.golesVisitante
-              ? "V"
+            : "E";
 
-              : "E";
+          const resultadoReal =
 
-            const ganadorReal =
+            real.golesLocal > real.golesVisitante
+            ? "L"
 
-              real.golesLocal > real.golesVisitante
-              ? "L"
+            : real.golesLocal < real.golesVisitante
+            ? "V"
 
-              : real.golesLocal < real.golesVisitante
-              ? "V"
+            : "E";
 
-              : "E";
+          if(
+            resultadoPronostico === resultadoReal
+          ){
 
-            if(
-              ganadorPronostico === ganadorReal
-            ){
-
-              puntos += 1;
-
-            }
+            puntos++;
 
           }
 
@@ -758,7 +761,9 @@ async function calcularPuntos(){
 
           usuario,
 
-          puntos
+          puntos,
+
+          exactos
 
         }
 
@@ -767,7 +772,7 @@ async function calcularPuntos(){
     }
 
     alert(
-      "🔥 Puntos calculados"
+      "🔥 Ranking calculado"
     );
 
   }catch(e){
