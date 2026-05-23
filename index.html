@@ -148,15 +148,14 @@ button.guardar:hover{
   background:#1e3c72;
 }
 
-.extra-title{
-  background:#ffedd5;
-  color:#9a3412;
-  padding:10px;
+.grupo-bloqueado{
+  margin-top:15px;
+  padding:12px;
+  background:#dcfce7;
+  color:#166534;
   border-radius:8px;
-  margin-top:20px;
-  margin-bottom:10px;
-  font-weight:bold;
   text-align:center;
+  font-weight:bold;
 }
 
 </style>
@@ -171,7 +170,7 @@ button.guardar:hover{
 
 <div class="container">
 
-<!-- USUARIO -->
+<!-- PARTICIPANTE -->
 
 <div class="card">
 
@@ -180,6 +179,7 @@ button.guardar:hover{
 <input
   id="usuario"
   placeholder="Escribe tu nombre"
+  onchange="renderPartidos(); cargarRanking();"
 />
 
 </div>
@@ -215,9 +215,7 @@ Grupo A
 
 <div id="partidos"></div>
 
-<!-- EXTRAS -->
-
-<div id="extras"></div>
+<div id="estadoGrupo"></div>
 
 <div
   class="indicadores"
@@ -226,9 +224,9 @@ Grupo A
 
 <button
   class="guardar"
-  onclick="guardarQuiniela()"
+  onclick="guardarGrupo()"
 >
-💾 Guardar Quiniela
+💾 Guardar Grupo
 </button>
 
 </div>
@@ -240,13 +238,6 @@ Grupo A
 <h2>🏆 Ranking</h2>
 
 <div id="ranking"></div>
-
-<button
-  class="guardar"
-  onclick="cargarRanking()"
->
-🔄 Actualizar Ranking
-</button>
 
 </div>
 
@@ -267,98 +258,11 @@ const grupos = [
 
 let indiceGrupo = 0;
 
-let memoria = {};
-
-let partidosExtras = [];
-
-/* =========================================
-   CARGAR EXTRAS
-========================================= */
-
-async function cargarExtras(){
-
-  try{
-
-    const res =
-      await fetch(
-        "https://quinielamundial2026.onrender.com/todos-partidos"
-      );
-
-    const data =
-      await res.json();
-
-    partidosExtras =
-      data.extras || [];
-
-    renderExtras();
-
-  }catch(e){
-
-    console.error(e);
-
-  }
-
-}
-
-/* =========================================
-   RENDER EXTRAS
-========================================= */
-
-function renderExtras(){
-
-  let html = "";
-
-  partidosExtras.forEach((p)=>{
-
-    html += `
-
-    <div class="extra-title">
-      ⚔️ ${p.fase}
-    </div>
-
-    <div class="partido">
-
-      <div class="team">
-        ${p.local}
-      </div>
-
-      <input
-        type="number"
-        class="marcador"
-        id="glExtra${p.id}"
-        min="0"
-        placeholder="0"
-      >
-
-      <input
-        type="number"
-        class="marcador"
-        id="gvExtra${p.id}"
-        min="0"
-        placeholder="0"
-      >
-
-      <div class="team">
-        ${p.visitante}
-      </div>
-
-    </div>
-
-    `;
-
-  });
-
-  document.getElementById(
-    "extras"
-  ).innerHTML = html;
-
-}
-
 /* =========================================
    RENDER PARTIDOS
 ========================================= */
 
-function renderPartidos(){
+async function renderPartidos(){
 
   const grupoActual =
     grupos[indiceGrupo];
@@ -372,9 +276,10 @@ function renderPartidos(){
 
   let jornadaActual = "";
 
-  const partidosGrupo = partidos.filter(
-    p => p.grupo === grupoActual
-  );
+  const partidosGrupo =
+    partidos.filter(
+      p => p.grupo === grupoActual
+    );
 
   partidosGrupo.forEach((p)=>{
 
@@ -405,7 +310,6 @@ function renderPartidos(){
         class="marcador"
         id="gl${p.id}"
         min="0"
-        placeholder="0"
       >
 
       <input
@@ -413,7 +317,6 @@ function renderPartidos(){
         class="marcador"
         id="gv${p.id}"
         min="0"
-        placeholder="0"
       >
 
       <div class="team">
@@ -432,7 +335,7 @@ function renderPartidos(){
 
   renderIndicadores();
 
-  recuperarTemporal();
+  await verificarGrupoGuardado();
 
 }
 
@@ -464,56 +367,128 @@ function renderIndicadores(){
 }
 
 /* =========================================
-   MEMORIA
+   BLOQUEAR GRUPO
 ========================================= */
 
-function guardarTemporal(){
+function bloquearGrupo(){
 
-  partidos.forEach((p)=>{
+  const inputs =
+    document.querySelectorAll(
+      ".marcador"
+    );
 
-    const gl =
-      document.getElementById(`gl${p.id}`);
+  inputs.forEach((i)=>{
 
-    const gv =
-      document.getElementById(`gv${p.id}`);
+    i.disabled = true;
 
-    if(!gl || !gv) return;
-
-    memoria[p.id] = {
-
-      golesLocal:gl.value,
-
-      golesVisitante:gv.value
-
-    };
+    i.style.background =
+      "#e5e7eb";
 
   });
 
 }
 
-function recuperarTemporal(){
+/* =========================================
+   DESBLOQUEAR GRUPO
+========================================= */
 
-  partidos.forEach((p)=>{
+function desbloquearGrupo(){
 
-    const gl =
-      document.getElementById(`gl${p.id}`);
+  const inputs =
+    document.querySelectorAll(
+      ".marcador"
+    );
 
-    const gv =
-      document.getElementById(`gv${p.id}`);
+  inputs.forEach((i)=>{
 
-    if(!gl || !gv) return;
+    i.disabled = false;
 
-    if(memoria[p.id]){
+    i.style.background =
+      "white";
 
-      gl.value =
-        memoria[p.id].golesLocal;
+  });
 
-      gv.value =
-        memoria[p.id].golesVisitante;
+}
+
+/* =========================================
+   VERIFICAR SI YA EXISTE
+========================================= */
+
+async function verificarGrupoGuardado(){
+
+  desbloquearGrupo();
+
+  document.getElementById(
+    "estadoGrupo"
+  ).innerHTML = "";
+
+  const usuario =
+    document.getElementById(
+      "usuario"
+    ).value;
+
+  if(!usuario) return;
+
+  const grupoActual =
+    grupos[indiceGrupo];
+
+  try{
+
+    const res =
+      await fetch(
+
+        `https://quiniela-mundial-juansantos-default-rtdb.firebaseio.com/quinielas/${usuario}/grupos/${grupoActual}.json`
+
+      );
+
+    const data =
+      await res.json();
+
+    if(data){
+
+      data.pronosticos.forEach((p)=>{
+
+        const gl =
+          document.getElementById(
+            `gl${p.partidoId}`
+          );
+
+        const gv =
+          document.getElementById(
+            `gv${p.partidoId}`
+          );
+
+        if(gl && gv){
+
+          gl.value =
+            p.golesLocal;
+
+          gv.value =
+            p.golesVisitante;
+
+        }
+
+      });
+
+      bloquearGrupo();
+
+      document.getElementById(
+        "estadoGrupo"
+      ).innerHTML = `
+
+      <div class="grupo-bloqueado">
+        🔒 Grupo ${grupoActual} ya guardado
+      </div>
+
+      `;
 
     }
 
-  });
+  }catch(e){
+
+    console.error(e);
+
+  }
 
 }
 
@@ -522,8 +497,6 @@ function recuperarTemporal(){
 ========================================= */
 
 function grupoSiguiente(){
-
-  guardarTemporal();
 
   if(indiceGrupo < grupos.length - 1){
 
@@ -537,8 +510,6 @@ function grupoSiguiente(){
 
 function grupoAnterior(){
 
-  guardarTemporal();
-
   if(indiceGrupo > 0){
 
     indiceGrupo--;
@@ -550,37 +521,61 @@ function grupoAnterior(){
 }
 
 /* =========================================
-   GUARDAR QUINIELA FIREBASE
+   GUARDAR GRUPO
 ========================================= */
 
-async function guardarQuiniela(){
-
-  guardarTemporal();
+async function guardarGrupo(){
 
   const usuario =
-    document.getElementById("usuario").value;
+    document.getElementById(
+      "usuario"
+    ).value;
 
   if(!usuario){
 
-    alert("Ingresa tu nombre");
+    alert(
+      "Ingresa tu nombre"
+    );
 
     return;
 
   }
 
+  const grupoActual =
+    grupos[indiceGrupo];
+
+  const partidosGrupo =
+    partidos.filter(
+      p => p.grupo === grupoActual
+    );
+
   let pronosticos = [];
 
-  partidos.forEach((p)=>{
+  let incompleto = false;
 
-    if(!memoria[p.id]) return;
+  partidosGrupo.forEach((p)=>{
 
-    const datos = memoria[p.id];
+    const gl =
+      document.getElementById(
+        `gl${p.id}`
+      );
+
+    const gv =
+      document.getElementById(
+        `gv${p.id}`
+      );
+
+    if(!gl || !gv) return;
 
     if(
-      datos.golesLocal === "" ||
-      datos.golesVisitante === ""
+      gl.value === "" ||
+      gv.value === ""
     ){
+
+      incompleto = true;
+
       return;
+
     }
 
     pronosticos.push({
@@ -593,66 +588,36 @@ async function guardarQuiniela(){
 
       visitante:p.visitante,
 
-      golesLocal:parseInt(
-        datos.golesLocal
-      ),
+      golesLocal:
+        parseInt(gl.value),
 
-      golesVisitante:parseInt(
-        datos.golesVisitante
-      )
+      golesVisitante:
+        parseInt(gv.value)
 
     });
 
   });
 
-  partidosExtras.forEach((p)=>{
+  if(incompleto){
 
-    const gl =
-      document.getElementById(
-        `glExtra${p.id}`
-      );
+    alert(
+      "Completa todos los partidos del grupo"
+    );
 
-    const gv =
-      document.getElementById(
-        `gvExtra${p.id}`
-      );
+    return;
 
-    if(!gl || !gv) return;
-
-    if(gl.value === "" || gv.value === ""){
-      return;
-    }
-
-    pronosticos.push({
-
-      partidoId:p.id,
-
-      fase:p.fase,
-
-      local:p.local,
-
-      visitante:p.visitante,
-
-      golesLocal:parseInt(gl.value),
-
-      golesVisitante:parseInt(gv.value)
-
-    });
-
-  });
+  }
 
   try{
 
-    const nuevaQuiniela =
-      firebasePush(
-        firebaseRef(db,"quinielas")
-      );
-
     await firebaseSet(
-      nuevaQuiniela,
-      {
 
-        usuario,
+      firebaseRef(
+        db,
+        `quinielas/${usuario}/grupos/${grupoActual}`
+      ),
+
+      {
 
         fecha:
           new Date().toISOString(),
@@ -660,30 +625,115 @@ async function guardarQuiniela(){
         pronosticos
 
       }
+
     );
 
-    alert("🔥 Quiniela guardada en Firebase");
+    bloquearGrupo();
+
+    document.getElementById(
+      "estadoGrupo"
+    ).innerHTML = `
+
+    <div class="grupo-bloqueado">
+      🔒 Grupo ${grupoActual} guardado
+    </div>
+
+    `;
+
+    cargarRanking();
+
+    alert(
+      `🔥 Grupo ${grupoActual} guardado`
+    );
 
   }catch(e){
 
     console.error(e);
 
-    alert("❌ Error guardando");
+    alert(
+      "❌ Error guardando"
+    );
 
   }
 
 }
 
 /* =========================================
-   RANKING
+   RANKING REAL
 ========================================= */
 
 async function cargarRanking(){
 
-  document.getElementById(
-    "ranking"
-  ).innerHTML =
-    "<div>🔥 Ranking próximamente desde Firebase</div>";
+  try{
+
+    const res =
+      await fetch(
+
+        "https://quiniela-mundial-juansantos-default-rtdb.firebaseio.com/ranking.json"
+
+      );
+
+    const data =
+      await res.json();
+
+    let html = "";
+
+    if(!data){
+
+      html = `
+
+      <div class="ranking-item">
+        Sin ranking todavía
+      </div>
+
+      `;
+
+    }else{
+
+      const ranking =
+        Object.values(data);
+
+      ranking.sort(
+        (a,b)=> b.puntos - a.puntos
+      );
+
+      ranking.forEach((r,i)=>{
+
+        let emoji = "🏅";
+
+        if(i === 0) emoji = "🥇";
+        if(i === 1) emoji = "🥈";
+        if(i === 2) emoji = "🥉";
+
+        html += `
+
+        <div class="ranking-item">
+
+          <div>
+            ${emoji} ${r.usuario}
+          </div>
+
+          <div>
+            ${r.puntos} pts
+          </div>
+
+        </div>
+
+        `;
+
+      });
+
+    }
+
+    document.getElementById(
+      "ranking"
+    ).innerHTML = html;
+
+  }catch(e){
+
+    console.error(e);
+
+  }
 
 }
 
@@ -694,8 +744,6 @@ async function cargarRanking(){
 renderPartidos();
 
 cargarRanking();
-
-cargarExtras();
 
 </script>
 
@@ -709,18 +757,14 @@ from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
 import {
   getDatabase,
   ref,
-  push,
   set
 }
 from "https://www.gstatic.com/firebasejs/12.13.0/firebase-database.js";
 
-/* =========================================
-   FIREBASE CONFIG
-========================================= */
-
 const firebaseConfig = {
 
-  apiKey: "AIzaSyA5b3WcLx8aQhtu2rlJRMhRHvMRH4ygLT8",
+  apiKey:
+    "AIzaSyA5b3WcLx8aQhtu2rlJRMhRHvMRH4ygLT8",
 
   authDomain:
     "quiniela-mundial-juansantos.firebaseapp.com",
@@ -742,25 +786,15 @@ const firebaseConfig = {
 
 };
 
-/* =========================================
-   INIT FIREBASE
-========================================= */
-
 const app =
   initializeApp(firebaseConfig);
 
 const db =
   getDatabase(app);
 
-/* =========================================
-   GLOBAL
-========================================= */
-
 window.db = db;
 
 window.firebaseRef = ref;
-
-window.firebasePush = push;
 
 window.firebaseSet = set;
 

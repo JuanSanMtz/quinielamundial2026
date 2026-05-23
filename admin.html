@@ -116,17 +116,6 @@ button.guardar:hover{
   text-align:center;
 }
 
-.extra-title{
-  background:#ffedd5;
-  color:#9a3412;
-  padding:10px;
-  border-radius:8px;
-  margin-top:20px;
-  margin-bottom:10px;
-  font-weight:bold;
-  text-align:center;
-}
-
 .info{
   background:#fff4d6;
   border:1px solid #ffe08a;
@@ -151,6 +140,16 @@ button.guardar:hover{
 
 .dot.active{
   background:#1e3c72;
+}
+
+.admin-ok{
+  background:#dcfce7;
+  color:#166534;
+  padding:12px;
+  border-radius:8px;
+  margin-bottom:15px;
+  text-align:center;
+  font-weight:bold;
 }
 
 </style>
@@ -201,12 +200,16 @@ Entrar
   style="display:none;"
 >
 
+<div
+  id="estadoAdmin"
+></div>
+
 <!-- RESULTADOS -->
 
 <div class="card">
 
 <div class="info">
-🏆 Captura los resultados reales.
+🏆 Captura resultados oficiales y calcula puntos.
 </div>
 
 <div class="grupo-header">
@@ -236,8 +239,6 @@ Grupo A
 
 <div id="partidos"></div>
 
-<div id="extras"></div>
-
 <div
   class="indicadores"
   id="indicadores"
@@ -250,39 +251,17 @@ Grupo A
 💾 Guardar Resultados
 </button>
 
-</div>
-
-<!-- EXTRA -->
-
-<div class="card">
-
-<h2>➕ Agregar Partido Extra</h2>
-
-<input
-  id="faseExtra"
-  placeholder="Fase"
->
-
-<input
-  id="localExtra"
-  placeholder="Equipo local"
->
-
-<input
-  id="visitanteExtra"
-  placeholder="Equipo visitante"
->
-
 <button
   class="guardar"
-  onclick="agregarPartidoExtra()"
+  style="background:#2e7d32;"
+  onclick="calcularPuntos()"
 >
-➕ Agregar Partido
+⚡ Calcular Puntos
 </button>
 
 </div>
 
-<!-- RESET -->
+<!-- RESETEAR -->
 
 <div class="card">
 
@@ -331,11 +310,11 @@ function login(){
 
     renderPartidos();
 
-    cargarExtras();
-
   }else{
 
-    alert("❌ Credenciales incorrectas");
+    alert(
+      "❌ Credenciales incorrectas"
+    );
 
   }
 
@@ -352,98 +331,11 @@ const grupos = [
 
 let indiceGrupo = 0;
 
-let memoria = {};
-
-let partidosExtras = [];
-
-/* =========================================
-   CARGAR EXTRAS
-========================================= */
-
-async function cargarExtras(){
-
-  try{
-
-    const res =
-      await fetch(
-        "https://quinielamundial2026.onrender.com/todos-partidos"
-      );
-
-    const data =
-      await res.json();
-
-    partidosExtras =
-      data.extras || [];
-
-    renderExtras();
-
-  }catch(e){
-
-    console.error(e);
-
-  }
-
-}
-
-/* =========================================
-   RENDER EXTRAS
-========================================= */
-
-function renderExtras(){
-
-  let html = "";
-
-  partidosExtras.forEach((p)=>{
-
-    html += `
-
-    <div class="extra-title">
-      ⚔️ ${p.fase}
-    </div>
-
-    <div class="partido">
-
-      <div class="team">
-        ${p.local}
-      </div>
-
-      <input
-        type="number"
-        class="marcador"
-        id="glExtra${p.id}"
-        min="0"
-        placeholder="0"
-      >
-
-      <input
-        type="number"
-        class="marcador"
-        id="gvExtra${p.id}"
-        min="0"
-        placeholder="0"
-      >
-
-      <div class="team">
-        ${p.visitante}
-      </div>
-
-    </div>
-
-    `;
-
-  });
-
-  document.getElementById(
-    "extras"
-  ).innerHTML = html;
-
-}
-
 /* =========================================
    RENDER PARTIDOS
 ========================================= */
 
-function renderPartidos(){
+async function renderPartidos(){
 
   const grupoActual =
     grupos[indiceGrupo];
@@ -515,6 +407,63 @@ function renderPartidos(){
 
   renderIndicadores();
 
+  cargarResultadosGuardados();
+
+}
+
+/* =========================================
+   CARGAR RESULTADOS
+========================================= */
+
+async function cargarResultadosGuardados(){
+
+  const grupoActual =
+    grupos[indiceGrupo];
+
+  try{
+
+    const res =
+      await fetch(
+
+        `https://quiniela-mundial-juansantos-default-rtdb.firebaseio.com/resultados/${grupoActual}.json`
+
+      );
+
+    const data =
+      await res.json();
+
+    if(!data) return;
+
+    data.forEach((p)=>{
+
+      const gl =
+        document.getElementById(
+          `gl${p.partidoId}`
+        );
+
+      const gv =
+        document.getElementById(
+          `gv${p.partidoId}`
+        );
+
+      if(gl && gv){
+
+        gl.value =
+          p.golesLocal;
+
+        gv.value =
+          p.golesVisitante;
+
+      }
+
+    });
+
+  }catch(e){
+
+    console.error(e);
+
+  }
+
 }
 
 /* =========================================
@@ -578,169 +527,256 @@ function grupoAnterior(){
 
 async function guardarResultados(){
 
+  const grupoActual =
+    grupos[indiceGrupo];
+
+  const partidosGrupo =
+    partidos.filter(
+      p => p.grupo === grupoActual
+    );
+
+  let resultados = [];
+
+  let incompleto = false;
+
+  partidosGrupo.forEach((p)=>{
+
+    const gl =
+      document.getElementById(
+        `gl${p.id}`
+      );
+
+    const gv =
+      document.getElementById(
+        `gv${p.id}`
+      );
+
+    if(!gl || !gv) return;
+
+    if(
+      gl.value === "" ||
+      gv.value === ""
+    ){
+
+      incompleto = true;
+
+      return;
+
+    }
+
+    resultados.push({
+
+      partidoId:p.id,
+
+      grupo:p.grupo,
+
+      local:p.local,
+
+      visitante:p.visitante,
+
+      golesLocal:
+        parseInt(gl.value),
+
+      golesVisitante:
+        parseInt(gv.value)
+
+    });
+
+  });
+
+  if(incompleto){
+
+    alert(
+      "Completa todos los partidos"
+    );
+
+    return;
+
+  }
+
   try{
 
-    partidos.forEach(async(p)=>{
+    await firebaseSet(
 
-      const gl =
-        document.getElementById(`gl${p.id}`);
+      firebaseRef(
+        db,
+        `resultados/${grupoActual}`
+      ),
 
-      const gv =
-        document.getElementById(`gv${p.id}`);
+      resultados
 
-      if(!gl || !gv) return;
+    );
 
-      if(gl.value === "" || gv.value === ""){
-        return;
-      }
+    document.getElementById(
+      "estadoAdmin"
+    ).innerHTML = `
 
-      await fetch(
+    <div class="admin-ok">
+      ✅ Resultados Grupo ${grupoActual} guardados
+    </div>
 
-        "https://quinielamundial2026.onrender.com/guardar-resultado",
+    `;
 
-        {
-
-          method:"POST",
-
-          headers:{
-            "Content-Type":"application/json"
-          },
-
-          body:JSON.stringify({
-
-            partidoId:p.id,
-
-            golesLocal:parseInt(gl.value),
-
-            golesVisitante:parseInt(gv.value)
-
-          })
-
-        }
-
-      );
-
-    });
-
-    partidosExtras.forEach(async(p)=>{
-
-      const gl =
-        document.getElementById(
-          `glExtra${p.id}`
-        );
-
-      const gv =
-        document.getElementById(
-          `gvExtra${p.id}`
-        );
-
-      if(!gl || !gv) return;
-
-      if(gl.value === "" || gv.value === ""){
-        return;
-      }
-
-      await fetch(
-
-        "https://quinielamundial2026.onrender.com/guardar-resultado",
-
-        {
-
-          method:"POST",
-
-          headers:{
-            "Content-Type":"application/json"
-          },
-
-          body:JSON.stringify({
-
-            partidoId:p.id,
-
-            golesLocal:parseInt(gl.value),
-
-            golesVisitante:parseInt(gv.value)
-
-          })
-
-        }
-
-      );
-
-    });
-
-    alert("🔥 Resultados guardados");
+    alert(
+      "🔥 Resultados guardados"
+    );
 
   }catch(e){
 
     console.error(e);
 
-    alert("❌ Error");
+    alert(
+      "❌ Error guardando"
+    );
 
   }
 
 }
 
 /* =========================================
-   AGREGAR EXTRA
+   CALCULAR PUNTOS
 ========================================= */
 
-async function agregarPartidoExtra(){
-
-  const fase =
-    document.getElementById("faseExtra").value;
-
-  const local =
-    document.getElementById("localExtra").value;
-
-  const visitante =
-    document.getElementById("visitanteExtra").value;
-
-  if(!fase || !local || !visitante){
-
-    alert("Completa todos los campos");
-
-    return;
-  }
-
-  const nuevo = {
-
-    id:Date.now(),
-
-    fase,
-
-    local,
-
-    visitante
-
-  };
+async function calcularPuntos(){
 
   try{
 
-    await fetch(
+    const resResultados =
+      await fetch(
 
-      "https://quinielamundial2026.onrender.com/agregar-partido",
+        "https://quiniela-mundial-juansantos-default-rtdb.firebaseio.com/resultados.json"
 
-      {
+      );
 
-        method:"POST",
+    const resultados =
+      await resResultados.json();
 
-        headers:{
-          "Content-Type":"application/json"
-        },
+    const resQuinielas =
+      await fetch(
 
-        body:JSON.stringify(nuevo)
+        "https://quiniela-mundial-juansantos-default-rtdb.firebaseio.com/quinielas.json"
+
+      );
+
+    const quinielas =
+      await resQuinielas.json();
+
+    if(!quinielas || !resultados){
+
+      alert(
+        "❌ Faltan datos"
+      );
+
+      return;
+
+    }
+
+    for(const usuario in quinielas){
+
+      let puntos = 0;
+
+      const gruposUsuario =
+        quinielas[usuario].grupos || {};
+
+      for(const grupo in gruposUsuario){
+
+        const pronosticos =
+          gruposUsuario[grupo].pronosticos || [];
+
+        const resultadosGrupo =
+          resultados[grupo] || [];
+
+        pronosticos.forEach((p)=>{
+
+          const real =
+            resultadosGrupo.find(
+              r => r.partidoId === p.partidoId
+            );
+
+          if(!real) return;
+
+          /* EXACTO = 3 */
+
+          if(
+
+            p.golesLocal === real.golesLocal &&
+
+            p.golesVisitante === real.golesVisitante
+
+          ){
+
+            puntos += 3;
+
+          }
+
+          /* GANADOR = 1 */
+
+          else{
+
+            const ganadorPronostico =
+
+              p.golesLocal > p.golesVisitante
+              ? "L"
+
+              : p.golesLocal < p.golesVisitante
+              ? "V"
+
+              : "E";
+
+            const ganadorReal =
+
+              real.golesLocal > real.golesVisitante
+              ? "L"
+
+              : real.golesLocal < real.golesVisitante
+              ? "V"
+
+              : "E";
+
+            if(
+              ganadorPronostico === ganadorReal
+            ){
+
+              puntos += 1;
+
+            }
+
+          }
+
+        });
 
       }
 
+      await firebaseSet(
+
+        firebaseRef(
+          db,
+          `ranking/${usuario}`
+        ),
+
+        {
+
+          usuario,
+
+          puntos
+
+        }
+
+      );
+
+    }
+
+    alert(
+      "🔥 Puntos calculados"
     );
-
-    alert("🔥 Partido agregado");
-
-    cargarExtras();
 
   }catch(e){
 
     console.error(e);
+
+    alert(
+      "❌ Error calculando"
+    );
 
   }
 
@@ -758,21 +794,95 @@ async function resetearDB(){
 
   if(!ok) return;
 
-  await fetch(
+  try{
 
-    "https://quinielamundial2026.onrender.com/reset",
+    await firebaseSet(
+      firebaseRef(db,"quinielas"),
+      null
+    );
 
-    {
-      method:"POST"
-    }
+    await firebaseSet(
+      firebaseRef(db,"resultados"),
+      null
+    );
 
-  );
+    await firebaseSet(
+      firebaseRef(db,"ranking"),
+      null
+    );
 
-  alert("🔥 Quiniela reiniciada");
+    alert(
+      "🔥 Quiniela reiniciada"
+    );
 
-  location.reload();
+    location.reload();
+
+  }catch(e){
+
+    console.error(e);
+
+  }
 
 }
+
+/* =========================================
+   INIT
+========================================= */
+
+renderIndicadores();
+
+</script>
+
+<!-- FIREBASE -->
+
+<script type="module">
+
+import { initializeApp }
+from "https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js";
+
+import {
+  getDatabase,
+  ref,
+  set
+}
+from "https://www.gstatic.com/firebasejs/12.13.0/firebase-database.js";
+
+const firebaseConfig = {
+
+  apiKey:
+    "AIzaSyA5b3WcLx8aQhtu2rlJRMhRHvMRH4ygLT8",
+
+  authDomain:
+    "quiniela-mundial-juansantos.firebaseapp.com",
+
+  databaseURL:
+    "https://quiniela-mundial-juansantos-default-rtdb.firebaseio.com",
+
+  projectId:
+    "quiniela-mundial-juansantos",
+
+  storageBucket:
+    "quiniela-mundial-juansantos.firebasestorage.app",
+
+  messagingSenderId:
+    "1023075867439",
+
+  appId:
+    "1:1023075867439:web:404064880c6cd75b801fda"
+
+};
+
+const app =
+  initializeApp(firebaseConfig);
+
+const db =
+  getDatabase(app);
+
+window.db = db;
+
+window.firebaseRef = ref;
+
+window.firebaseSet = set;
 
 </script>
 
