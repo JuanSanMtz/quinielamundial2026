@@ -1,32 +1,11 @@
-# Mejoras Quiniela Mundial 2026
-
-## Objetivos implementados
-
-### Admin
-
-* Login admin (`admin` / `1234`)
-* Bloqueo del panel hasta autenticación
-* Tabla de ranking visible en admin
-* Navegación por grupos
-* Herramientas admin
-* Base preparada para futuras fases
-
-### Usuario
-
-* Compatible con futuras fases dinámicas
-* Ranking y panel funcionando
-
----
-
-# ARCHIVO: admin.html
-
-```html
-<!-- REEMPLAZA TODO TU admin.html CON ESTE CÓDIGO -->
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
+
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
 <title>Admin Mundial 2026</title>
 
 <style>
@@ -82,11 +61,25 @@ button{
   margin-top:10px;
 }
 
-.btn-login{ background:#1e3c72; }
-.btn-guardar{ background:#2563eb; }
-.btn-ranking{ background:#15803d; }
-.btn-danger{ background:#dc2626; }
-.btn-warning{ background:#ea580c; }
+.btn-login{
+  background:#1e3c72;
+}
+
+.btn-guardar{
+  background:#2563eb;
+}
+
+.btn-ranking{
+  background:#15803d;
+}
+
+.btn-danger{
+  background:#dc2626;
+}
+
+.btn-warning{
+  background:#ea580c;
+}
 
 .grupo-header{
   display:flex;
@@ -134,7 +127,9 @@ button{
 }
 
 </style>
+
 </head>
+
 <body>
 
 <header>
@@ -144,82 +139,138 @@ button{
 <div class="container">
 
 <!-- LOGIN -->
+
 <div class="card" id="loginCard">
 
 <h2>🔒 Acceso Admin</h2>
 
-<input id="adminUser" placeholder="Usuario">
-<br><br>
-<input id="adminPass" type="password" placeholder="Contraseña">
+<input
+  id="adminUser"
+  placeholder="Usuario"
+>
 
-<button class="btn-login" onclick="loginAdmin()">
+<br><br>
+
+<input
+  id="adminPass"
+  type="password"
+  placeholder="Contraseña"
+>
+
+<button
+  class="btn-login"
+  onclick="loginAdmin()"
+>
 Ingresar
 </button>
 
 </div>
 
-<!-- PANEL -->
-<div id="panelAdmin" class="hidden">
+<!-- PANEL ADMIN -->
+
+<div
+  id="panelAdmin"
+  class="hidden"
+>
+
+<!-- RESULTADOS -->
 
 <div class="card">
 
 <div class="grupo-header">
 
-<button class="nav-btn" onclick="grupoAnterior()"><</button>
+<button
+  class="nav-btn"
+  onclick="grupoAnterior()"
+>
+<
+</button>
 
-<h2 id="grupoTitulo">Grupo A</h2>
+<h2 id="grupoTitulo">
+Grupo A
+</h2>
 
-<button class="nav-btn" onclick="grupoSiguiente()">></button>
+<button
+  class="nav-btn"
+  onclick="grupoSiguiente()"
+>
+>
+</button>
 
 </div>
 
 <div id="partidos"></div>
 
-<button class="btn-guardar" onclick="guardarResultadosGrupo()">
+<button
+  class="btn-guardar"
+  onclick="guardarResultadosGrupo()"
+>
 💾 Guardar Resultados Grupo
 </button>
 
-<button class="btn-ranking" onclick="calcularPuntos()">
+<button
+  class="btn-ranking"
+  onclick="calcularPuntos()"
+>
 ⚡ Actualizar Ranking
 </button>
 
 </div>
 
 <!-- TABLA RANKING -->
+
 <div class="card">
 
 <h2>🏆 Ranking Actual</h2>
 
 <table class="tabla-ranking">
+
 <thead>
+
 <tr>
 <th>#</th>
 <th>Usuario</th>
 <th>Puntos</th>
 <th>Exactos</th>
 </tr>
+
 </thead>
+
 <tbody id="tablaRanking"></tbody>
+
 </table>
 
 </div>
 
-<!-- TOOLS -->
+<!-- HERRAMIENTAS -->
+
 <div class="card">
 
-<h2>🧨 Herramientas</h2>
+<h2>🧨 Herramientas Admin</h2>
 
-<input id="usuarioEliminar" placeholder="Usuario a eliminar">
+<input
+  id="usuarioEliminar"
+  placeholder="Usuario a eliminar"
+>
 
-<button class="btn-warning" onclick="eliminarUsuario()">
+<button
+  class="btn-warning"
+  onclick="eliminarUsuario()"
+>
 ❌ Eliminar Usuario
 </button>
 
-<button class="btn-danger" onclick="resetRanking()">
+<button
+  class="btn-danger"
+  onclick="resetRanking()"
+>
 🏆 Reiniciar Ranking
 </button>
 
-<button class="btn-danger" onclick="resetMundial()">
+<button
+  class="btn-danger"
+  onclick="resetMundial()"
+>
 🧨 Reiniciar Mundial
 </button>
 
@@ -240,16 +291,32 @@ const grupos = [
 
 let indiceGrupo = 0;
 
+/* LOGIN */
+
 function loginAdmin(){
 
-  const user = document.getElementById('adminUser').value;
-  const pass = document.getElementById('adminPass').value;
+  const user =
+    document.getElementById(
+      'adminUser'
+    ).value;
 
-  if(user === 'admin' && pass === '1234'){
+  const pass =
+    document.getElementById(
+      'adminPass'
+    ).value;
 
-    document.getElementById('loginCard').classList.add('hidden');
+  if(
+    user === 'admin' &&
+    pass === '1234'
+  ){
 
-    document.getElementById('panelAdmin').classList.remove('hidden');
+    document.getElementById(
+      'loginCard'
+    ).classList.add('hidden');
+
+    document.getElementById(
+      'panelAdmin'
+    ).classList.remove('hidden');
 
     renderPartidos();
 
@@ -257,23 +324,32 @@ function loginAdmin(){
 
   }else{
 
-    alert('❌ Acceso incorrecto');
+    alert(
+      '❌ Acceso incorrecto'
+    );
 
   }
 
 }
 
+/* RENDER PARTIDOS */
+
 function renderPartidos(){
 
-  const grupoActual = grupos[indiceGrupo];
+  const grupoActual =
+    grupos[indiceGrupo];
 
-  document.getElementById('grupoTitulo').innerHTML = `Grupo ${grupoActual}`;
+  document.getElementById(
+    'grupoTitulo'
+  ).innerHTML =
+    `Grupo ${grupoActual}`;
 
   let html = '';
 
-  const partidosGrupo = partidos.filter(
-    p => p.grupo === grupoActual
-  );
+  const partidosGrupo =
+    partidos.filter(
+      p => p.grupo === grupoActual
+    );
 
   partidosGrupo.forEach((p)=>{
 
@@ -281,13 +357,25 @@ function renderPartidos(){
 
     <div class="partido">
 
-      <div class="team">${p.local}</div>
+      <div class="team">
+        ${p.local}
+      </div>
 
-      <input type="number" id="gl${p.id}" value="0">
+      <input
+        type="number"
+        id="gl${p.id}"
+        value="0"
+      >
 
-      <input type="number" id="gv${p.id}" value="0">
+      <input
+        type="number"
+        id="gv${p.id}"
+        value="0"
+      >
 
-      <div class="team">${p.visitante}</div>
+      <div class="team">
+        ${p.visitante}
+      </div>
 
     </div>
 
@@ -295,15 +383,22 @@ function renderPartidos(){
 
   });
 
-  document.getElementById('partidos').innerHTML = html;
+  document.getElementById(
+    'partidos'
+  ).innerHTML = html;
 
   cargarResultadosGrupo();
 
 }
 
+/* NAVEGACION */
+
 function grupoSiguiente(){
 
-  if(indiceGrupo < grupos.length - 1){
+  if(
+    indiceGrupo <
+    grupos.length - 1
+  ){
 
     indiceGrupo++;
 
@@ -325,13 +420,17 @@ function grupoAnterior(){
 
 }
 
+/* GUARDAR RESULTADOS */
+
 async function guardarResultadosGrupo(){
 
-  const grupoActual = grupos[indiceGrupo];
+  const grupoActual =
+    grupos[indiceGrupo];
 
-  const partidosGrupo = partidos.filter(
-    p => p.grupo === grupoActual
-  );
+  const partidosGrupo =
+    partidos.filter(
+      p => p.grupo === grupoActual
+    );
 
   let data = [];
 
@@ -342,11 +441,19 @@ async function guardarResultadosGrupo(){
       partidoId:p.id,
 
       golesLocal:parseInt(
-        document.getElementById(`gl${p.id}`).value
+
+        document.getElementById(
+          `gl${p.id}`
+        ).value
+
       ),
 
       golesVisitante:parseInt(
-        document.getElementById(`gv${p.id}`).value
+
+        document.getElementById(
+          `gv${p.id}`
+        ).value
+
       )
 
     });
@@ -364,13 +471,18 @@ async function guardarResultadosGrupo(){
 
   );
 
-  alert('🔥 Resultados guardados');
+  alert(
+    '🔥 Resultados guardados'
+  );
 
 }
 
+/* CARGAR RESULTADOS */
+
 async function cargarResultadosGrupo(){
 
-  const grupoActual = grupos[indiceGrupo];
+  const grupoActual =
+    grupos[indiceGrupo];
 
   const res = await fetch(
 
@@ -378,19 +490,30 @@ async function cargarResultadosGrupo(){
 
   );
 
-  const data = await res.json();
+  const data =
+    await res.json();
 
   if(!data) return;
 
   data.forEach((p)=>{
 
-    const gl = document.getElementById(`gl${p.partidoId}`);
-    const gv = document.getElementById(`gv${p.partidoId}`);
+    const gl =
+      document.getElementById(
+        `gl${p.partidoId}`
+      );
+
+    const gv =
+      document.getElementById(
+        `gv${p.partidoId}`
+      );
 
     if(gl && gv){
 
-      gl.value = p.golesLocal;
-      gv.value = p.golesVisitante;
+      gl.value =
+        p.golesLocal;
+
+      gv.value =
+        p.golesVisitante;
 
     }
 
@@ -398,60 +521,117 @@ async function cargarResultadosGrupo(){
 
 }
 
+/* CALCULAR RANKING */
+
 async function calcularPuntos(){
 
-  const resResultados = await fetch(
-    'https://quiniela-mundial-juansantos-default-rtdb.firebaseio.com/resultados.json'
-  );
+  const resResultados =
+    await fetch(
 
-  const resultados = await resResultados.json();
+      'https://quiniela-mundial-juansantos-default-rtdb.firebaseio.com/resultados.json'
 
-  const resQuinielas = await fetch(
-    'https://quiniela-mundial-juansantos-default-rtdb.firebaseio.com/quinielas.json'
-  );
+    );
 
-  const quinielas = await resQuinielas.json();
+  const resultados =
+    await resResultados.json();
+
+  const resQuinielas =
+    await fetch(
+
+      'https://quiniela-mundial-juansantos-default-rtdb.firebaseio.com/quinielas.json'
+
+    );
+
+  const quinielas =
+    await resQuinielas.json();
 
   for(const usuario in quinielas){
 
     let puntos = 0;
+
     let exactos = 0;
 
-    const gruposUsuario = quinielas[usuario].grupos || {};
+    const gruposUsuario =
+      quinielas[usuario].grupos || {};
 
     for(const grupo in gruposUsuario){
 
-      const pronosticos = gruposUsuario[grupo].pronosticos || [];
+      const pronosticos =
+        gruposUsuario[grupo]
+        .pronosticos || [];
 
-      const resultadosGrupo = resultados[grupo];
+      const resultadosGrupo =
+        resultados[grupo];
 
-      if(!resultadosGrupo) continue;
+      if(!resultadosGrupo){
+
+        continue;
+
+      }
 
       pronosticos.forEach((p)=>{
 
-        const real = resultadosGrupo.find(
-          r => Number(r.partidoId) === Number(p.partidoId)
-        );
+        const real =
+          resultadosGrupo.find(
+
+            r =>
+
+              Number(r.partidoId) ===
+              Number(p.partidoId)
+
+          );
 
         if(!real) return;
 
         if(
-          p.golesLocal === real.golesLocal &&
-          p.golesVisitante === real.golesVisitante
+
+          p.golesLocal ===
+          real.golesLocal &&
+
+          p.golesVisitante ===
+          real.golesVisitante
+
         ){
+
           exactos++;
+
         }
 
         const pronostico =
-          p.golesLocal > p.golesVisitante ? 'L' :
-          p.golesLocal < p.golesVisitante ? 'V' : 'E';
+
+          p.golesLocal >
+          p.golesVisitante
+
+          ? 'L'
+
+          : p.golesLocal <
+            p.golesVisitante
+
+          ? 'V'
+
+          : 'E';
 
         const realResultado =
-          real.golesLocal > real.golesVisitante ? 'L' :
-          real.golesLocal < real.golesVisitante ? 'V' : 'E';
 
-        if(pronostico === realResultado){
+          real.golesLocal >
+          real.golesVisitante
+
+          ? 'L'
+
+          : real.golesLocal <
+            real.golesVisitante
+
+          ? 'V'
+
+          : 'E';
+
+        if(
+          pronostico ===
+          realResultado
+        ){
+
           puntos++;
+
         }
 
       });
@@ -459,41 +639,71 @@ async function calcularPuntos(){
     }
 
     await firebaseSet(
-      firebaseRef(db, `ranking/${usuario}`),
+
+      firebaseRef(
+        db,
+        `ranking/${usuario}`
+      ),
+
       {
+
         usuario,
+
         puntos,
+
         exactos
+
       }
+
     );
 
   }
 
   cargarRankingTabla();
 
-  alert('🔥 Ranking actualizado');
+  alert(
+    '🔥 Ranking actualizado'
+  );
 
 }
 
+/* TABLA RANKING */
+
 async function cargarRankingTabla(){
 
-  const res = await fetch(
-    'https://quiniela-mundial-juansantos-default-rtdb.firebaseio.com/ranking.json'
-  );
+  const res =
+    await fetch(
 
-  const data = await res.json();
+      'https://quiniela-mundial-juansantos-default-rtdb.firebaseio.com/ranking.json'
+
+    );
+
+  const data =
+    await res.json();
 
   if(!data) return;
 
-  const ranking = Object.values(data);
+  const ranking =
+    Object.values(data);
 
   ranking.sort((a,b)=>{
 
-    if(b.puntos !== a.puntos){
-      return b.puntos - a.puntos;
+    if(
+      b.puntos !==
+      a.puntos
+    ){
+
+      return (
+        b.puntos -
+        a.puntos
+      );
+
     }
 
-    return b.exactos - a.exactos;
+    return (
+      b.exactos -
+      a.exactos
+    );
 
   });
 
@@ -504,61 +714,131 @@ async function cargarRankingTabla(){
     html += `
 
     <tr>
+
       <td>${i+1}</td>
+
       <td>${r.usuario}</td>
+
       <td>${r.puntos}</td>
+
       <td>${r.exactos}</td>
+
     </tr>
 
     `;
 
   });
 
-  document.getElementById('tablaRanking').innerHTML = html;
+  document.getElementById(
+    'tablaRanking'
+  ).innerHTML = html;
 
 }
+
+/* ELIMINAR USUARIO */
 
 async function eliminarUsuario(){
 
-  const usuario = document.getElementById('usuarioEliminar').value;
+  const usuario =
+    document.getElementById(
+      'usuarioEliminar'
+    ).value;
 
   if(!usuario) return;
 
-  await firebaseRemove(firebaseRef(db, `quinielas/${usuario}`));
+  await firebaseRemove(
 
-  await firebaseRemove(firebaseRef(db, `ranking/${usuario}`));
+    firebaseRef(
+      db,
+      `quinielas/${usuario}`
+    )
 
-  alert('🔥 Usuario eliminado');
+  );
+
+  await firebaseRemove(
+
+    firebaseRef(
+      db,
+      `ranking/${usuario}`
+    )
+
+  );
+
+  alert(
+    '🔥 Usuario eliminado'
+  );
 
   cargarRankingTabla();
 
 }
+
+/* RESET RANKING */
 
 async function resetRanking(){
 
-  const ok = confirm('¿Eliminar ranking completo?');
+  const ok = confirm(
+    '¿Eliminar ranking completo?'
+  );
 
   if(!ok) return;
 
-  await firebaseRemove(firebaseRef(db, 'ranking'));
+  await firebaseRemove(
+
+    firebaseRef(
+      db,
+      'ranking'
+    )
+
+  );
 
   cargarRankingTabla();
 
-  alert('🔥 Ranking eliminado');
+  alert(
+    '🔥 Ranking eliminado'
+  );
 
 }
 
+/* RESET MUNDIAL */
+
 async function resetMundial(){
 
-  const ok = confirm('⚠️ Se borrará TODO');
+  const ok = confirm(
+    '⚠️ Se borrará TODO'
+  );
 
   if(!ok) return;
 
-  await firebaseRemove(firebaseRef(db, 'ranking'));
-  await firebaseRemove(firebaseRef(db, 'quinielas'));
-  await firebaseRemove(firebaseRef(db, 'resultados'));
+  await firebaseRemove(
 
-  alert('🔥 Mundial reiniciado');
+    firebaseRef(
+      db,
+      'ranking'
+    )
+
+  );
+
+  await firebaseRemove(
+
+    firebaseRef(
+      db,
+      'quinielas'
+    )
+
+  );
+
+  await firebaseRemove(
+
+    firebaseRef(
+      db,
+      'resultados'
+    )
+
+  );
+
+  alert(
+    '🔥 Mundial reiniciado'
+  );
 
 }
 
@@ -570,128 +850,55 @@ import { initializeApp }
 from 'https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js';
 
 import {
+
   getDatabase,
   ref,
   set,
   remove
+
 }
 from 'https://www.gstatic.com/firebasejs/12.13.0/firebase-database.js';
 
 const firebaseConfig = {
 
-  apiKey:'AIzaSyA5b3WcLx8aQhtu2rlJRMhRHvMRH4ygLT8',
-  authDomain:'quiniela-mundial-juansantos.firebaseapp.com',
-  databaseURL:'https://quiniela-mundial-juansantos-default-rtdb.firebaseio.com',
-  projectId:'quiniela-mundial-juansantos',
-  storageBucket:'quiniela-mundial-juansantos.firebasestorage.app',
-  messagingSenderId:'1023075867439',
-  appId:'1:1023075867439:web:404064880c6cd75b801fda'
+  apiKey:
+    'AIzaSyA5b3WcLx8aQhtu2rlJRMhRHvMRH4ygLT8',
+
+  authDomain:
+    'quiniela-mundial-juansantos.firebaseapp.com',
+
+  databaseURL:
+    'https://quiniela-mundial-juansantos-default-rtdb.firebaseio.com',
+
+  projectId:
+    'quiniela-mundial-juansantos',
+
+  storageBucket:
+    'quiniela-mundial-juansantos.firebasestorage.app',
+
+  messagingSenderId:
+    '1023075867439',
+
+  appId:
+    '1:1023075867439:web:404064880c6cd75b801fda'
 
 };
 
-const app = initializeApp(firebaseConfig);
+const app =
+  initializeApp(firebaseConfig);
 
-const db = getDatabase(app);
+const db =
+  getDatabase(app);
 
 window.db = db;
+
 window.firebaseRef = ref;
+
 window.firebaseSet = set;
+
 window.firebaseRemove = remove;
 
 </script>
 
 </body>
 </html>
-```
-
----
-
-# ARCHIVO: index.html
-
-## NO necesitas reemplazarlo completo ahorita.
-
-Tu index actual ya funciona correctamente.
-
-La siguiente mejora será:
-
-* fases dinámicas
-* octavos
-* cuartos
-* semifinal
-* final
-
-Y eso sí requerirá:
-
-* nuevo `partidos.js`
-* pequeños cambios en index
-* pequeños cambios admin
-
----
-
-# PASOS GIT Y FIREBASE
-
-## 1. Guarda archivos
-
-## 2. Terminal VSCode
-
-```bash
-git add .
-```
-
-```bash
-git commit -m "Admin login y ranking tabla"
-```
-
-```bash
-git push
-```
-
-```bash
-firebase deploy
-```
-
----
-
-# PROBAR
-
-## ADMIN
-
-Entrar:
-
-Usuario:
-
-```txt
-admin
-```
-
-Password:
-
-```txt
-1234
-```
-
-Verificar:
-
-* login
-* ranking tabla
-* guardar resultados
-* actualizar ranking
-* eliminar usuario
-
----
-
-# SIGUIENTE FASE
-
-Después haremos:
-
-## PARTIDOS DINÁMICOS
-
-* Grupos
-* Octavos
-* Cuartos
-* Semifinal
-* Final
-
-Y cuando admin agregue partidos:
-
-🔥 automáticamente aparecerán en index usuario.
