@@ -26,7 +26,7 @@ header{
 }
 
 .container{
-  max-width:1000px;
+  max-width:1100px;
   margin:auto;
   padding:20px;
 }
@@ -43,11 +43,13 @@ header{
   display:none;
 }
 
-input{
+input,
+select{
   padding:10px;
   border-radius:8px;
   border:1px solid #ccc;
   box-sizing:border-box;
+  width:100%;
 }
 
 button{
@@ -73,12 +75,12 @@ button{
   background:#15803d;
 }
 
-.btn-danger{
-  background:#dc2626;
+.btn-final{
+  background:#7c3aed;
 }
 
-.btn-warning{
-  background:#ea580c;
+.btn-danger{
+  background:#b91c1c;
 }
 
 .grupo-header{
@@ -97,7 +99,7 @@ button{
 
 .partido{
   display:grid;
-  grid-template-columns:1fr 60px 60px 1fr;
+  grid-template-columns:1fr 70px 70px 1fr;
   gap:10px;
   align-items:center;
   padding:10px 0;
@@ -135,6 +137,23 @@ button{
   color:white;
 }
 
+.grid-final{
+  display:grid;
+  grid-template-columns:1fr 1fr 1fr;
+  gap:10px;
+}
+
+.fase-label{
+  background:#ede9fe;
+  padding:10px;
+  border-radius:8px;
+  margin-top:20px;
+  margin-bottom:10px;
+  font-weight:bold;
+  color:#5b21b6;
+  font-size:18px;
+}
+
 </style>
 
 </head>
@@ -146,8 +165,6 @@ button{
 </header>
 
 <div class="container">
-
-<!-- LOGIN -->
 
 <div class="card" id="loginCard">
 
@@ -175,16 +192,16 @@ Ingresar
 
 </div>
 
-<!-- PANEL -->
-
 <div
   id="panelAdmin"
   class="hidden"
 >
 
-<!-- RESULTADOS -->
+<!-- GRUPOS -->
 
 <div class="card">
+
+<h2>⚽ Resultados Grupos A-L</h2>
 
 <div class="grupo-header">
 
@@ -226,6 +243,95 @@ Grupo A
 
 </div>
 
+<!-- CREAR PARTIDOS -->
+
+<div class="card">
+
+<h2>➕ Crear Partido Fase Final</h2>
+
+<div class="grid-final">
+
+<select id="faseFinal">
+
+<option value="OCTAVOS">
+OCTAVOS
+</option>
+
+<option value="CUARTOS">
+CUARTOS
+</option>
+
+<option value="SEMIFINAL">
+SEMIFINAL
+</option>
+
+<option value="FINAL">
+FINAL
+</option>
+
+</select>
+
+<input
+  id="equipoLocalFinal"
+  placeholder="Equipo local"
+>
+
+<input
+  id="equipoVisitanteFinal"
+  placeholder="Equipo visitante"
+>
+
+</div>
+
+<button
+  class="btn-final"
+  onclick="crearPartidoFinal()"
+>
+➕ Crear Partido
+</button>
+
+</div>
+
+<!-- VER FASE -->
+
+<div class="card">
+
+<h2>🏆 Ver Fase Final</h2>
+
+<select
+  id="verFase"
+  onchange="cargarPartidosFinales()"
+>
+
+<option value="OCTAVOS">
+OCTAVOS
+</option>
+
+<option value="CUARTOS">
+CUARTOS
+</option>
+
+<option value="SEMIFINAL">
+SEMIFINAL
+</option>
+
+<option value="FINAL">
+FINAL
+</option>
+
+</select>
+
+<div id="partidosFinales"></div>
+
+<button
+  class="btn-final"
+  onclick="guardarResultadosFinales()"
+>
+💾 Guardar Resultados Finales
+</button>
+
+</div>
+
 <!-- RANKING -->
 
 <div class="card">
@@ -251,11 +357,48 @@ Grupo A
 
 </div>
 
-<!-- HERRAMIENTAS -->
+<!-- EMERGENCIA -->
 
 <div class="card">
 
-<h2>🧨 Herramientas Admin</h2>
+<h2>🚨 Emergencia</h2>
+
+<button
+  class="btn-danger"
+  onclick="borrarTodoMundial()"
+>
+🧨 Borrar TODO el Mundial
+</button>
+
+<button
+  class="btn-danger"
+  onclick="borrarRanking()"
+>
+📊 Borrar Ranking
+</button>
+
+<button
+  class="btn-danger"
+  onclick="borrarQuinielas()"
+>
+📝 Borrar Quinielas
+</button>
+
+<button
+  class="btn-danger"
+  onclick="borrarResultados()"
+>
+⚽ Borrar Resultados
+</button>
+
+<button
+  class="btn-danger"
+  onclick="borrarFasesFinales()"
+>
+🏆 Borrar Fases Finales
+</button>
+
+<hr>
 
 <input
   id="usuarioEliminar"
@@ -263,24 +406,10 @@ Grupo A
 >
 
 <button
-  class="btn-warning"
-  onclick="eliminarUsuario()"
->
-❌ Eliminar Usuario
-</button>
-
-<button
   class="btn-danger"
-  onclick="resetRanking()"
+  onclick="borrarUsuario()"
 >
-🏆 Reiniciar Ranking
-</button>
-
-<button
-  class="btn-danger"
-  onclick="resetMundial()"
->
-🧨 Reiniciar Mundial
+❌ Borrar Usuario
 </button>
 
 </div>
@@ -293,17 +422,20 @@ Grupo A
 
 <script>
 
+/* =========================================
+   VARIABLES
+========================================= */
+
 const grupos = [
-  'A',
-  'OCTAVOS',
-  'CUARTOS',
-  'SEMIFINAL',
-  'FINAL'
+  'A','B','C','D','E','F',
+  'G','H','I','J','K','L'
 ];
 
 let indiceGrupo = 0;
 
-/* LOGIN */
+/* =========================================
+   LOGIN
+========================================= */
 
 function loginAdmin(){
 
@@ -334,6 +466,8 @@ function loginAdmin(){
 
     cargarRankingTabla();
 
+    cargarPartidosFinales();
+
   }else{
 
     alert(
@@ -344,7 +478,9 @@ function loginAdmin(){
 
 }
 
-/* RENDER */
+/* =========================================
+   RENDER GRUPOS
+========================================= */
 
 function renderPartidos(){
 
@@ -354,7 +490,7 @@ function renderPartidos(){
   document.getElementById(
     'grupoTitulo'
   ).innerHTML =
-    grupoActual;
+    `Grupo ${grupoActual}`;
 
   let html = '';
 
@@ -368,24 +504,18 @@ function renderPartidos(){
   partidosGrupo.forEach((p)=>{
 
     if(
-      p.fase === 'grupos'
+      jornadaActual !== p.jornada
     ){
 
-      if(
-        jornadaActual !== p.jornada
-      ){
+      jornadaActual = p.jornada;
 
-        jornadaActual = p.jornada;
+      html += `
 
-        html += `
+      <div class="jornada">
+        Jornada ${p.jornada}
+      </div>
 
-        <div class="jornada">
-          Jornada ${jornadaActual}
-        </div>
-
-        `;
-
-      }
+      `;
 
     }
 
@@ -427,7 +557,9 @@ function renderPartidos(){
 
 }
 
-/* NAVEGACION */
+/* =========================================
+   NAVEGACION
+========================================= */
 
 function grupoSiguiente(){
 
@@ -456,7 +588,9 @@ function grupoAnterior(){
 
 }
 
-/* GUARDAR */
+/* =========================================
+   GUARDAR RESULTADOS
+========================================= */
 
 async function guardarResultadosGrupo(){
 
@@ -475,21 +609,19 @@ async function guardarResultadosGrupo(){
     data.push({
 
       partidoId:p.id,
+      local:p.local,
+      visitante:p.visitante,
 
       golesLocal:parseInt(
-
         document.getElementById(
           `gl${p.id}`
         ).value
-
       ),
 
       golesVisitante:parseInt(
-
         document.getElementById(
           `gv${p.id}`
         ).value
-
       )
 
     });
@@ -512,8 +644,6 @@ async function guardarResultadosGrupo(){
   );
 
 }
-
-/* CARGAR RESULTADOS */
 
 async function cargarResultadosGrupo(){
 
@@ -557,15 +687,222 @@ async function cargarResultadosGrupo(){
 
 }
 
-/* CALCULAR */
+/* =========================================
+   CREAR PARTIDOS FINALES
+========================================= */
+
+async function crearPartidoFinal(){
+
+  const fase =
+    document.getElementById(
+      'faseFinal'
+    ).value;
+
+  const local =
+    document.getElementById(
+      'equipoLocalFinal'
+    ).value;
+
+  const visitante =
+    document.getElementById(
+      'equipoVisitanteFinal'
+    ).value;
+
+  if(
+    !local ||
+    !visitante
+  ){
+
+    alert(
+      'Completa equipos'
+    );
+
+    return;
+
+  }
+
+  const id =
+    Date.now();
+
+  await firebaseSet(
+
+    firebaseRef(
+      db,
+      `fasesFinales/${fase}/${id}`
+    ),
+
+    {
+
+      id,
+      fase,
+      local,
+      visitante,
+      golesLocal:0,
+      golesVisitante:0
+
+    }
+
+  );
+
+  document.getElementById(
+    'equipoLocalFinal'
+  ).value = '';
+
+  document.getElementById(
+    'equipoVisitanteFinal'
+  ).value = '';
+
+  cargarPartidosFinales();
+
+  alert(
+    '🔥 Partido creado'
+  );
+
+}
+
+/* =========================================
+   CARGAR PARTIDOS FINALES
+========================================= */
+
+async function cargarPartidosFinales(){
+
+  const fase =
+    document.getElementById(
+      'verFase'
+    ).value;
+
+  const res = await fetch(
+
+    `https://quiniela-mundial-juansantos-default-rtdb.firebaseio.com/fasesFinales/${fase}.json`
+
+  );
+
+  const data =
+    await res.json();
+
+  if(!data){
+
+    document.getElementById(
+      'partidosFinales'
+    ).innerHTML =
+      'Sin partidos creados';
+
+    return;
+
+  }
+
+  let html = `
+
+  <div class="fase-label">
+    🏆 ${fase}
+  </div>
+
+  `;
+
+  Object.values(data).forEach((p)=>{
+
+    html += `
+
+    <div class="partido">
+
+      <div class="team">
+        ${p.local}
+      </div>
+
+      <input
+        type="number"
+        id="fgl${p.id}"
+        value="${p.golesLocal}"
+      >
+
+      <input
+        type="number"
+        id="fgv${p.id}"
+        value="${p.golesVisitante}"
+      >
+
+      <div class="team">
+        ${p.visitante}
+      </div>
+
+    </div>
+
+    `;
+
+  });
+
+  document.getElementById(
+    'partidosFinales'
+  ).innerHTML = html;
+
+}
+
+/* =========================================
+   GUARDAR FINALES
+========================================= */
+
+async function guardarResultadosFinales(){
+
+  const fase =
+    document.getElementById(
+      'verFase'
+    ).value;
+
+  const res = await fetch(
+
+    `https://quiniela-mundial-juansantos-default-rtdb.firebaseio.com/fasesFinales/${fase}.json`
+
+  );
+
+  const data =
+    await res.json();
+
+  if(!data) return;
+
+  for(const key in data){
+
+    data[key].golesLocal =
+      parseInt(
+        document.getElementById(
+          `fgl${data[key].id}`
+        ).value
+      );
+
+    data[key].golesVisitante =
+      parseInt(
+        document.getElementById(
+          `fgv${data[key].id}`
+        ).value
+      );
+
+    await firebaseSet(
+
+      firebaseRef(
+        db,
+        `fasesFinales/${fase}/${key}`
+      ),
+
+      data[key]
+
+    );
+
+  }
+
+  alert(
+    '🔥 Resultados finales guardados'
+  );
+
+}
+
+/* =========================================
+   CALCULAR PUNTOS
+========================================= */
 
 async function calcularPuntos(){
 
   const resResultados =
     await fetch(
-
       'https://quiniela-mundial-juansantos-default-rtdb.firebaseio.com/resultados.json'
-
     );
 
   const resultados =
@@ -573,18 +910,25 @@ async function calcularPuntos(){
 
   const resQuinielas =
     await fetch(
-
       'https://quiniela-mundial-juansantos-default-rtdb.firebaseio.com/quinielas.json'
-
     );
 
   const quinielas =
     await resQuinielas.json();
 
+  if(!quinielas){
+
+    alert(
+      'No hay quinielas'
+    );
+
+    return;
+
+  }
+
   for(const usuario in quinielas){
 
     let puntos = 0;
-
     let exactos = 0;
 
     const gruposUsuario =
@@ -629,7 +973,10 @@ async function calcularPuntos(){
 
         ){
 
+          puntos += 3;
           exactos++;
+
+          return;
 
         }
 
@@ -666,7 +1013,7 @@ async function calcularPuntos(){
           realResultado
         ){
 
-          puntos++;
+          puntos += 1;
 
         }
 
@@ -684,9 +1031,7 @@ async function calcularPuntos(){
       {
 
         usuario,
-
         puntos,
-
         exactos
 
       }
@@ -703,15 +1048,15 @@ async function calcularPuntos(){
 
 }
 
-/* TABLA */
+/* =========================================
+   CARGAR RANKING
+========================================= */
 
 async function cargarRankingTabla(){
 
   const res =
     await fetch(
-
       'https://quiniela-mundial-juansantos-default-rtdb.firebaseio.com/ranking.json'
-
     );
 
   const data =
@@ -771,63 +1116,60 @@ async function cargarRankingTabla(){
 
 }
 
-/* ELIMINAR */
+/* =========================================
+   EMERGENCIA
+========================================= */
 
-async function eliminarUsuario(){
+async function borrarTodoMundial(){
 
-  const usuario =
-    document.getElementById(
-      'usuarioEliminar'
-    ).value;
+  const confirmacion =
+    prompt(
+      '⚠️ Escribe BORRAR'
+    );
 
-  if(!usuario) return;
+  if(
+    confirmacion !==
+    'BORRAR'
+  ){
 
-  await firebaseRemove(
+    return;
 
-    firebaseRef(
-      db,
-      `quinielas/${usuario}`
-    )
+  }
 
+  await firebaseSet(
+    firebaseRef(db,'resultados'),
+    null
   );
 
-  await firebaseRemove(
+  await firebaseSet(
+    firebaseRef(db,'quinielas'),
+    null
+  );
 
-    firebaseRef(
-      db,
-      `ranking/${usuario}`
-    )
+  await firebaseSet(
+    firebaseRef(db,'ranking'),
+    null
+  );
 
+  await firebaseSet(
+    firebaseRef(db,'fasesFinales'),
+    null
   );
 
   alert(
-    '🔥 Usuario eliminado'
+    '🔥 Mundial reiniciado'
   );
 
-  cargarRankingTabla();
+  location.reload();
 
 }
 
-/* RESET */
+async function borrarRanking(){
 
-async function resetRanking(){
-
-  const ok = confirm(
-    '¿Eliminar ranking completo?'
+  await firebaseSet(
+    firebaseRef(db,'ranking'),
+    null
   );
-
-  if(!ok) return;
-
-  await firebaseRemove(
-
-    firebaseRef(
-      db,
-      'ranking'
-    )
-
-  );
-
-  cargarRankingTabla();
 
   alert(
     '🔥 Ranking eliminado'
@@ -835,46 +1177,87 @@ async function resetRanking(){
 
 }
 
-async function resetMundial(){
+async function borrarQuinielas(){
 
-  const ok = confirm(
-    '⚠️ Se borrará TODO'
-  );
-
-  if(!ok) return;
-
-  await firebaseRemove(
-
-    firebaseRef(
-      db,
-      'ranking'
-    )
-
-  );
-
-  await firebaseRemove(
-
-    firebaseRef(
-      db,
-      'quinielas'
-    )
-
-  );
-
-  await firebaseRemove(
-
-    firebaseRef(
-      db,
-      'resultados'
-    )
-
+  await firebaseSet(
+    firebaseRef(db,'quinielas'),
+    null
   );
 
   alert(
-    '🔥 Mundial reiniciado'
+    '🔥 Quinielas eliminadas'
   );
 
 }
+
+async function borrarResultados(){
+
+  await firebaseSet(
+    firebaseRef(db,'resultados'),
+    null
+  );
+
+  alert(
+    '🔥 Resultados eliminados'
+  );
+
+}
+
+async function borrarFasesFinales(){
+
+  await firebaseSet(
+    firebaseRef(db,'fasesFinales'),
+    null
+  );
+
+  alert(
+    '🔥 Fases eliminadas'
+  );
+
+}
+
+async function borrarUsuario(){
+
+  const usuario =
+    document.getElementById(
+      'usuarioEliminar'
+    ).value;
+
+  if(!usuario){
+
+    alert(
+      'Escribe usuario'
+    );
+
+    return;
+
+  }
+
+  await firebaseSet(
+    firebaseRef(
+      db,
+      `quinielas/${usuario}`
+    ),
+    null
+  );
+
+  await firebaseSet(
+    firebaseRef(
+      db,
+      `ranking/${usuario}`
+    ),
+    null
+  );
+
+  alert(
+    `🔥 ${usuario} eliminado`
+  );
+
+}
+
+/* =========================================
+   FIREBASE
+========================================= */
 
 </script>
 
@@ -884,12 +1267,9 @@ import { initializeApp }
 from 'https://www.gstatic.com/firebasejs/12.13.0/firebase-app.js';
 
 import {
-
   getDatabase,
   ref,
-  set,
-  remove
-
+  set
 }
 from 'https://www.gstatic.com/firebasejs/12.13.0/firebase-database.js';
 
@@ -925,12 +1305,8 @@ const db =
   getDatabase(app);
 
 window.db = db;
-
 window.firebaseRef = ref;
-
 window.firebaseSet = set;
-
-window.firebaseRemove = remove;
 
 </script>
 
