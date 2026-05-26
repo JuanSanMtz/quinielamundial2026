@@ -109,6 +109,15 @@ button{
   font-weight:bold;
 }
 
+.jornada{
+  background:#dfe7f5;
+  padding:10px;
+  border-radius:8px;
+  margin-top:15px;
+  margin-bottom:10px;
+  font-weight:bold;
+}
+
 .tabla-ranking{
   width:100%;
   border-collapse:collapse;
@@ -166,7 +175,7 @@ Ingresar
 
 </div>
 
-<!-- PANEL ADMIN -->
+<!-- PANEL -->
 
 <div
   id="panelAdmin"
@@ -217,7 +226,7 @@ Grupo A
 
 </div>
 
-<!-- TABLA RANKING -->
+<!-- RANKING -->
 
 <div class="card">
 
@@ -285,8 +294,11 @@ Grupo A
 <script>
 
 const grupos = [
-  'A','B','C','D','E','F',
-  'G','H','I','J','K','L'
+  'A',
+  'OCTAVOS',
+  'CUARTOS',
+  'SEMIFINAL',
+  'FINAL'
 ];
 
 let indiceGrupo = 0;
@@ -332,7 +344,7 @@ function loginAdmin(){
 
 }
 
-/* RENDER PARTIDOS */
+/* RENDER */
 
 function renderPartidos(){
 
@@ -342,9 +354,11 @@ function renderPartidos(){
   document.getElementById(
     'grupoTitulo'
   ).innerHTML =
-    `Grupo ${grupoActual}`;
+    grupoActual;
 
   let html = '';
+
+  let jornadaActual = '';
 
   const partidosGrupo =
     partidos.filter(
@@ -352,6 +366,28 @@ function renderPartidos(){
     );
 
   partidosGrupo.forEach((p)=>{
+
+    if(
+      p.fase === 'grupos'
+    ){
+
+      if(
+        jornadaActual !== p.jornada
+      ){
+
+        jornadaActual = p.jornada;
+
+        html += `
+
+        <div class="jornada">
+          Jornada ${jornadaActual}
+        </div>
+
+        `;
+
+      }
+
+    }
 
     html += `
 
@@ -420,7 +456,7 @@ function grupoAnterior(){
 
 }
 
-/* GUARDAR RESULTADOS */
+/* GUARDAR */
 
 async function guardarResultadosGrupo(){
 
@@ -521,7 +557,7 @@ async function cargarResultadosGrupo(){
 
 }
 
-/* CALCULAR RANKING */
+/* CALCULAR */
 
 async function calcularPuntos(){
 
@@ -667,7 +703,7 @@ async function calcularPuntos(){
 
 }
 
-/* TABLA RANKING */
+/* TABLA */
 
 async function cargarRankingTabla(){
 
@@ -735,7 +771,7 @@ async function cargarRankingTabla(){
 
 }
 
-/* ELIMINAR USUARIO */
+/* ELIMINAR */
 
 async function eliminarUsuario(){
 
@@ -772,7 +808,7 @@ async function eliminarUsuario(){
 
 }
 
-/* RESET RANKING */
+/* RESET */
 
 async function resetRanking(){
 
@@ -798,8 +834,6 @@ async function resetRanking(){
   );
 
 }
-
-/* RESET MUNDIAL */
 
 async function resetMundial(){
 

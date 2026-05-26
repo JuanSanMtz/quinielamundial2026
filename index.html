@@ -278,7 +278,7 @@ Grupo A
 
 </div>
 
-<!-- MI PANEL -->
+<!-- PANEL -->
 
 <div class="card">
 
@@ -317,20 +317,17 @@ Grupo A
 
 <script>
 
-/* =========================================
-   VARIABLES
-========================================= */
-
 const grupos = [
-  "A","B","C","D","E","F",
-  "G","H","I","J","K","L"
+  'A',
+  'OCTAVOS',
+  'CUARTOS',
+  'SEMIFINAL',
+  'FINAL'
 ];
 
 let indiceGrupo = 0;
 
-/* =========================================
-   CACHE
-========================================= */
+/* CACHE */
 
 function guardarCacheUsuario(){
 
@@ -421,9 +418,7 @@ function recuperarCacheGrupo(){
 
 }
 
-/* =========================================
-   PANEL USUARIO
-========================================= */
+/* PANEL */
 
 async function cargarMiPanel(){
 
@@ -438,9 +433,7 @@ async function cargarMiPanel(){
 
     const resRanking =
       await fetch(
-
         "https://quiniela-mundial-juansantos-default-rtdb.firebaseio.com/ranking.json"
-
       );
 
     const rankingData =
@@ -509,104 +502,6 @@ async function cargarMiPanel(){
 
     }
 
-    const resQuiniela =
-      await fetch(
-
-        `https://quiniela-mundial-juansantos-default-rtdb.firebaseio.com/quinielas/${usuario}.json`
-
-      );
-
-    const quiniela =
-      await resQuiniela.json();
-
-    const resResultados =
-      await fetch(
-
-        "https://quiniela-mundial-juansantos-default-rtdb.firebaseio.com/resultados.json"
-
-      );
-
-    const resultados =
-      await resResultados.json();
-
-    let html = "";
-
-    if(
-      quiniela &&
-      resultados
-    ){
-
-      for(const grupo in quiniela.grupos){
-
-        const pronosticos =
-          quiniela.grupos[grupo]
-          .pronosticos || [];
-
-        const resultadosGrupo =
-          resultados[grupo];
-
-        if(!resultadosGrupo){
-
-          continue;
-
-        }
-
-        pronosticos.forEach((p)=>{
-
-          const real =
-            resultadosGrupo.find(
-
-              r =>
-
-                Number(r.partidoId) ===
-                Number(p.partidoId)
-
-            );
-
-          if(!real) return;
-
-          const exacto =
-
-            p.golesLocal ===
-            real.golesLocal &&
-
-            p.golesVisitante ===
-            real.golesVisitante;
-
-          html += `
-
-          <div class="detalle-item">
-
-            <div>
-
-              ${p.local}
-              ${p.golesLocal}-${p.golesVisitante}
-              ${p.visitante}
-
-            </div>
-
-            <div class="
-              ${exacto ? 'ok' : 'bad'}
-            ">
-
-              ${exacto ? '✅' : '❌'}
-
-            </div>
-
-          </div>
-
-          `;
-
-        });
-
-      }
-
-    }
-
-    document.getElementById(
-      "detalleUsuario"
-    ).innerHTML = html;
-
   }catch(e){
 
     console.error(e);
@@ -615,9 +510,7 @@ async function cargarMiPanel(){
 
 }
 
-/* =========================================
-   RENDER PARTIDOS
-========================================= */
+/* RENDER */
 
 async function renderPartidos(){
 
@@ -638,7 +531,7 @@ async function renderPartidos(){
   document.getElementById(
     "grupoTitulo"
   ).innerHTML =
-    `Grupo ${grupoActual}`;
+    grupoActual;
 
   let html = "";
 
@@ -651,17 +544,25 @@ async function renderPartidos(){
 
   partidosGrupo.forEach((p)=>{
 
-    if(jornadaActual !== p.jornada){
+    if(
+      p.fase === "grupos"
+    ){
 
-      jornadaActual = p.jornada;
+      if(
+        jornadaActual !== p.jornada
+      ){
 
-      html += `
+        jornadaActual = p.jornada;
 
-      <div class="jornada">
-        Jornada ${jornadaActual}
-      </div>
+        html += `
 
-      `;
+        <div class="jornada">
+          Jornada ${jornadaActual}
+        </div>
+
+        `;
+
+      }
 
     }
 
@@ -681,9 +582,6 @@ async function renderPartidos(){
         value="0"
         oninput="
           guardarCacheGrupo();
-          moverSiguiente(
-            'gv${p.id}'
-          );
         "
       >
 
@@ -720,28 +618,7 @@ async function renderPartidos(){
 
 }
 
-/* =========================================
-   AUTO FOCUS
-========================================= */
-
-function moverSiguiente(id){
-
-  const el =
-    document.getElementById(id);
-
-  if(el){
-
-    el.focus();
-
-    el.select();
-
-  }
-
-}
-
-/* =========================================
-   INDICADORES
-========================================= */
+/* INDICADORES */
 
 function renderIndicadores(){
 
@@ -766,9 +643,7 @@ function renderIndicadores(){
 
 }
 
-/* =========================================
-   BLOQUEAR
-========================================= */
+/* BLOQUEAR */
 
 function bloquearGrupo(){
 
@@ -788,9 +663,7 @@ function bloquearGrupo(){
 
 }
 
-/* =========================================
-   DESBLOQUEAR
-========================================= */
+/* DESBLOQUEAR */
 
 function desbloquearGrupo(){
 
@@ -810,9 +683,7 @@ function desbloquearGrupo(){
 
 }
 
-/* =========================================
-   VERIFICAR FIREBASE
-========================================= */
+/* VERIFICAR */
 
 async function verificarGrupoGuardado(){
 
@@ -877,7 +748,7 @@ async function verificarGrupoGuardado(){
       ).innerHTML = `
 
       <div class="grupo-bloqueado">
-        🔒 Grupo ${grupoActual} ya guardado
+        🔒 ${grupoActual} ya guardado
       </div>
 
       `;
@@ -892,15 +763,16 @@ async function verificarGrupoGuardado(){
 
 }
 
-/* =========================================
-   NAVEGACIÓN
-========================================= */
+/* NAVEGACION */
 
 function grupoSiguiente(){
 
   guardarCacheGrupo();
 
-  if(indiceGrupo < grupos.length - 1){
+  if(
+    indiceGrupo <
+    grupos.length - 1
+  ){
 
     indiceGrupo++;
 
@@ -924,48 +796,16 @@ function grupoAnterior(){
 
 }
 
-/* =========================================
-   CONFIRMAR
-========================================= */
+/* CONFIRMAR */
 
 function confirmarGuardado(){
 
   const grupoActual =
     grupos[indiceGrupo];
 
-  const partidosGrupo =
-    partidos.filter(
-      p => p.grupo === grupoActual
-    );
-
-  let resumen = `Grupo ${grupoActual}\n\n`;
-
-  partidosGrupo.forEach((p)=>{
-
-    const gl =
-      document.getElementById(
-        `gl${p.id}`
-      ).value;
-
-    const gv =
-      document.getElementById(
-        `gv${p.id}`
-      ).value;
-
-    resumen +=
-
-      `${p.local} ${gl}-${gv} ${p.visitante}\n`;
-
-  });
-
-  const ok =
-    confirm(
-
-      resumen +
-
-      `\n¿Confirmar grupo?`
-
-    );
+  const ok = confirm(
+    `¿Guardar ${grupoActual}?`
+  );
 
   if(ok){
 
@@ -975,9 +815,7 @@ function confirmarGuardado(){
 
 }
 
-/* =========================================
-   GUARDAR
-========================================= */
+/* GUARDAR */
 
 async function guardarGrupo(){
 
@@ -1008,16 +846,6 @@ async function guardarGrupo(){
 
   partidosGrupo.forEach((p)=>{
 
-    const gl =
-      document.getElementById(
-        `gl${p.id}`
-      );
-
-    const gv =
-      document.getElementById(
-        `gv${p.id}`
-      );
-
     pronosticos.push({
 
       partidoId:p.id,
@@ -1028,75 +856,71 @@ async function guardarGrupo(){
 
       visitante:p.visitante,
 
-      golesLocal:
-        parseInt(gl.value),
+      golesLocal:parseInt(
 
-      golesVisitante:
-        parseInt(gv.value)
+        document.getElementById(
+          `gl${p.id}`
+        ).value
+
+      ),
+
+      golesVisitante:parseInt(
+
+        document.getElementById(
+          `gv${p.id}`
+        ).value
+
+      )
 
     });
 
   });
 
-  try{
+  await firebaseSet(
 
-    await firebaseSet(
+    firebaseRef(
+      db,
+      `quinielas/${usuario}/grupos/${grupoActual}`
+    ),
 
-      firebaseRef(
-        db,
-        `quinielas/${usuario}/grupos/${grupoActual}`
-      ),
+    {
 
-      {
+      fecha:
+        new Date().toISOString(),
 
-        fecha:
-          new Date().toISOString(),
+      pronosticos
 
-        pronosticos
+    }
 
-      }
+  );
 
-    );
+  bloquearGrupo();
 
-    bloquearGrupo();
+  localStorage.removeItem(
+    `cache_${grupoActual}`
+  );
 
-    localStorage.removeItem(
-      `cache_${grupoActual}`
-    );
+  document.getElementById(
+    "estadoGrupo"
+  ).innerHTML = `
 
-    document.getElementById(
-      "estadoGrupo"
-    ).innerHTML = `
+  <div class="grupo-bloqueado">
+    🔒 ${grupoActual} guardado
+  </div>
 
-    <div class="grupo-bloqueado">
-      🔒 Grupo ${grupoActual} guardado
-    </div>
+  `;
 
-    `;
+  cargarRanking();
 
-    cargarRanking();
+  cargarMiPanel();
 
-    cargarMiPanel();
-
-    alert(
-      `🔥 Grupo ${grupoActual} guardado`
-    );
-
-  }catch(e){
-
-    console.error(e);
-
-    alert(
-      "❌ Error guardando"
-    );
-
-  }
+  alert(
+    `🔥 ${grupoActual} guardado`
+  );
 
 }
 
-/* =========================================
-   RANKING
-========================================= */
+/* RANKING */
 
 async function cargarRanking(){
 
@@ -1104,9 +928,7 @@ async function cargarRanking(){
 
     const res =
       await fetch(
-
         "https://quiniela-mundial-juansantos-default-rtdb.firebaseio.com/ranking.json"
-
       );
 
     const data =
@@ -1131,13 +953,22 @@ async function cargarRanking(){
 
       ranking.sort((a,b)=>{
 
-        if(b.puntos !== a.puntos){
+        if(
+          b.puntos !==
+          a.puntos
+        ){
 
-          return b.puntos - a.puntos;
+          return (
+            b.puntos -
+            a.puntos
+          );
 
         }
 
-        return b.exactos - a.exactos;
+        return (
+          b.exactos -
+          a.exactos
+        );
 
       });
 
@@ -1182,9 +1013,7 @@ async function cargarRanking(){
 
 }
 
-/* =========================================
-   INIT
-========================================= */
+/* INIT */
 
 window.onload = ()=>{
 
@@ -1210,8 +1039,6 @@ window.onload = ()=>{
 };
 
 </script>
-
-<!-- FIREBASE -->
 
 <script type="module">
 
@@ -1265,5 +1092,4 @@ window.firebaseSet = set;
 </script>
 
 </body>
-
 </html>
