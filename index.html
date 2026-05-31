@@ -1243,18 +1243,22 @@ async function cargarMisResultados(){
 
       if(
 
-        p.golesLocal ===
-        real.golesLocal &&
+      p.golesLocal ===
+      real.golesLocal &&
 
-        p.golesVisitante ===
-        real.golesVisitante
+      p.golesVisitante ===
+       real.golesVisitante
 
-      ){
+      )
 
-        clase = 'acierto';
-        texto = '3 pts';
+      {
 
-      }else{
+  clase = 'acierto';
+  texto = '2 pts';
+
+}
+      
+      else{
 
         const pronostico =
 
@@ -1384,7 +1388,7 @@ async function cargarMisResultados(){
       ){
 
         clase = 'acierto';
-        texto = '5 pts';
+        texto = '2 pts';
 
       }else{
 
@@ -1419,7 +1423,7 @@ async function cargarMisResultados(){
         if(pronostico === resultado){
 
           clase = 'parcial';
-          texto = '2 pts';
+          texto = '1 pts';
 
         }
 

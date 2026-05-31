@@ -898,6 +898,7 @@ async function guardarResultadosFinales(){
    CALCULAR PUNTOS
 ========================================= */
 
+
 async function calcularPuntos(){
 
   const resResultados =
@@ -918,10 +919,7 @@ async function calcularPuntos(){
 
   if(!quinielas){
 
-    alert(
-      'No hay quinielas'
-    );
-
+    alert('No hay quinielas');
     return;
 
   }
@@ -937,84 +935,116 @@ async function calcularPuntos(){
     for(const grupo in gruposUsuario){
 
       const pronosticos =
-        gruposUsuario[grupo]
-        .pronosticos || [];
+        gruposUsuario[grupo].pronosticos || [];
 
       const resultadosGrupo =
-        resultados[grupo];
+        resultados?.[grupo];
 
-      if(!resultadosGrupo){
-
-        continue;
-
-      }
+      if(!resultadosGrupo) continue;
 
       pronosticos.forEach((p)=>{
 
         const real =
           resultadosGrupo.find(
-
             r =>
-
               Number(r.partidoId) ===
               Number(p.partidoId)
-
           );
 
         if(!real) return;
 
         if(
-
-          p.golesLocal ===
-          real.golesLocal &&
-
-          p.golesVisitante ===
-          real.golesVisitante
-
+          p.golesLocal === real.golesLocal &&
+          p.golesVisitante === real.golesVisitante
         ){
-
-          puntos += 3;
+          puntos += 2;
           exactos++;
-
           return;
-
         }
 
         const pronostico =
-
-          p.golesLocal >
-          p.golesVisitante
-
+          p.golesLocal > p.golesVisitante
           ? 'L'
-
-          : p.golesLocal <
-            p.golesVisitante
-
+          : p.golesLocal < p.golesVisitante
           ? 'V'
-
           : 'E';
 
         const realResultado =
-
-          real.golesLocal >
-          real.golesVisitante
-
+          real.golesLocal > real.golesVisitante
           ? 'L'
-
-          : real.golesLocal <
-            real.golesVisitante
-
+          : real.golesLocal < real.golesVisitante
           ? 'V'
-
           : 'E';
 
-        if(
-          pronostico ===
-          realResultado
-        ){
-
+        if(pronostico === realResultado){
           puntos += 1;
+        }
 
+      });
+
+    }
+
+    const fases = [
+      'OCTAVOS',
+      'CUARTOS',
+      'SEMIFINAL',
+      'FINAL'
+    ];
+
+    const fasesUsuario =
+      quinielas[usuario].fasesFinales || {};
+
+    for(const fase of fases){
+
+      const pronosticos =
+        fasesUsuario[fase]?.pronosticos || [];
+
+      const resFase =
+        await fetch(
+          `https://quiniela-mundial-juansantos-default-rtdb.firebaseio.com/fasesFinales/${fase}.json`
+        );
+
+      const resultadosFase =
+        await resFase.json();
+
+      if(!resultadosFase) continue;
+
+      pronosticos.forEach((p)=>{
+
+        const real =
+          Object.values(resultadosFase).find(
+            r =>
+              Number(r.id) ===
+              Number(p.partidoId)
+          );
+
+        if(!real) return;
+
+        if(
+          p.golesLocal === real.golesLocal &&
+          p.golesVisitante === real.golesVisitante
+        ){
+          puntos += 2;
+          exactos++;
+          return;
+        }
+
+        const pronostico =
+          p.golesLocal > p.golesVisitante
+          ? 'L'
+          : p.golesLocal < p.golesVisitante
+          ? 'V'
+          : 'E';
+
+        const realResultado =
+          real.golesLocal > real.golesVisitante
+          ? 'L'
+          : real.golesLocal < real.golesVisitante
+          ? 'V'
+          : 'E';
+
+        if(pronostico === realResultado){
+          puntos += 1;
         }
 
       });
@@ -1022,31 +1052,25 @@ async function calcularPuntos(){
     }
 
     await firebaseSet(
-
       firebaseRef(
         db,
         `ranking/${usuario}`
       ),
-
       {
-
         usuario,
         puntos,
         exactos
-
       }
-
     );
 
   }
 
   cargarRankingTabla();
 
-  alert(
-    '🔥 Ranking actualizado'
-  );
+  alert('🔥 Ranking actualizado');
 
 }
+
 
 /* =========================================
    CARGAR RANKING
