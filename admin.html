@@ -539,9 +539,17 @@ function renderPartidos(){
         value="0"
       >
 
-      <div class="team">
-        ${p.visitante}
-      </div>
+     <div class="team">
+      ${p.visitante}
+     </div>
+
+     <label style="display:flex;align-items:center;gap:5px;">
+     <input
+     type="checkbox"
+     id="fin${p.id}"
+    >
+    Finalizado
+    </label>
 
     </div>
 
@@ -606,6 +614,11 @@ async function guardarResultadosGrupo(){
 
   partidosGrupo.forEach((p)=>{
 
+    const finalizado =
+      document.getElementById(
+        `fin${p.id}`
+      )?.checked || false;
+
     data.push({
 
       partidoId:p.id,
@@ -622,7 +635,9 @@ async function guardarResultadosGrupo(){
         document.getElementById(
           `gv${p.id}`
         ).value
-      )
+      ),
+
+      finalizado
 
     });
 
@@ -651,35 +666,29 @@ async function cargarResultadosGrupo(){
     grupos[indiceGrupo];
 
   const res = await fetch(
-
     `https://quiniela-mundial-juansantos-default-rtdb.firebaseio.com/resultados/${grupoActual}.json`
-
   );
 
-  const data =
-    await res.json();
+  const data = await res.json();
 
   if(!data) return;
 
   data.forEach((p)=>{
 
-    const gl =
-      document.getElementById(
-        `gl${p.partidoId}`
-      );
-
-    const gv =
-      document.getElementById(
-        `gv${p.partidoId}`
-      );
+    const gl = document.getElementById(`gl${p.partidoId}`);
+    const gv = document.getElementById(`gv${p.partidoId}`);
 
     if(gl && gv){
 
-      gl.value =
-        p.golesLocal;
+      gl.value = p.golesLocal;
+      gv.value = p.golesVisitante;
 
-      gv.value =
-        p.golesVisitante;
+      const fin =
+        document.getElementById(`fin${p.partidoId}`);
+
+      if(fin){
+        fin.checked = p.finalizado === true;
+      }
 
     }
 
@@ -952,6 +961,8 @@ async function calcularPuntos(){
           );
 
         if(!real) return;
+
+        if(real.finalizado !== true) return;
 
         if(
           p.golesLocal === real.golesLocal &&

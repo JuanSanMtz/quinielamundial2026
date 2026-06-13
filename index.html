@@ -1238,6 +1238,8 @@ async function cargarMisResultados(){
 
       if(!real) return;
 
+      if(real.finalizado !== true) return;
+
       let clase = 'fallo';
       let texto = '0';
 
@@ -1373,6 +1375,8 @@ async function cargarMisResultados(){
         );
 
       if(!real) return;
+
+      if(real.finalizado !== true) return;
 
       let clase = 'fallo';
       let texto = '0';
