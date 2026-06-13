@@ -1109,13 +1109,60 @@ async function cargarRanking(){
 
       });
 
+      html += `
+
+      <div style="
+        font-size:12px;
+        color:#666;
+        margin-bottom:10px;
+        text-align:center;
+      ">
+        💡 P = Puntos | E = Marcador Exacto
+      </div>
+
+      <div class="ranking-item"
+        style="
+          font-weight:bold;
+          background:#f3f4f6;
+        "
+      >
+
+        <div>
+          Usuario
+        </div>
+
+        <div>
+          P&nbsp;&nbsp;&nbsp;E
+        </div>
+
+      </div>
+
+      `;
+
+      let posicionMostrada = 0;
+
       ranking.forEach((r,i)=>{
+
+        if(
+          i === 0 ||
+          r.puntos !== ranking[i-1].puntos ||
+          r.exactos !== ranking[i-1].exactos
+        ){
+
+          posicionMostrada = i + 1;
+
+        }
 
         let emoji = "🏅";
 
-        if(i === 0) emoji = "🥇";
-        if(i === 1) emoji = "🥈";
-        if(i === 2) emoji = "🥉";
+        if(posicionMostrada === 1)
+          emoji = "🥇";
+
+        else if(posicionMostrada === 2)
+          emoji = "🥈";
+
+        else if(posicionMostrada === 3)
+          emoji = "🥉";
 
         html += `
 
@@ -1126,8 +1173,9 @@ async function cargarRanking(){
           </div>
 
           <div>
-            ${r.puntos} pts
-            ⭐ ${r.exactos}
+            ${r.puntos}
+            &nbsp;&nbsp;&nbsp;
+            ${r.exactos}
           </div>
 
         </div>
