@@ -243,6 +243,13 @@ Grupo A
 
 </div>
 
+<button
+  class="btn-final"
+  onclick="actualizarMundial()"
+>
+⚽ Actualizar Mundial
+</button>
+
 <!-- CREAR PARTIDOS -->
 
 <div class="card">
@@ -357,6 +364,7 @@ FINAL
 
 </div>
 
+
 <!-- EMERGENCIA -->
 
 <div class="card">
@@ -420,7 +428,26 @@ FINAL
 
 <script src="partidos.js"></script>
 
+
 <script>
+
+async function actualizarMundial(){
+
+  alert("Actualizando resultados...");
+
+  const res = await fetch(
+    "https://us-central1-quiniela-mundial-juansantos.cloudfunctions.net/actualizarResultadosMundial"
+  );
+
+  const data = await res.json();
+
+  console.log(data);
+
+  await calcularPuntos();
+
+  alert("🔥 Mundial y ranking actualizados");
+
+}
 
 /* =========================================
    VARIABLES
