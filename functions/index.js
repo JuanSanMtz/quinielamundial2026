@@ -565,6 +565,12 @@ const finalizados = response.data.matches
   )
   .slice(-5);
 
+  res.json({
+  vivo,
+  programados,
+  finalizados
+});
+
     } catch (error) {
 
       res.status(500).json({
