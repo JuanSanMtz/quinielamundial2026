@@ -545,34 +545,25 @@ exports.obtenerMarcadoresVivo = onRequest((req, res) => {
         }
       );
 
-      const partidosVivo = response.data.matches
-        .filter(m =>
-          m.status === "LIVE" ||
-          m.status === "IN_PLAY" ||
-          m.status === "PAUSED"
-        )
-        .map(m => ({
+      const vivo = response.data.matches
+  .filter(m =>
+    m.status === "LIVE" ||
+    m.status === "IN_PLAY" ||
+    m.status === "PAUSED"
+  );
 
-          id: m.id,
+const programados = response.data.matches
+  .filter(m =>
+    m.status === "TIMED" ||
+    m.status === "SCHEDULED"
+  )
+  .slice(0,5);
 
-          local: m.homeTeam.name,
-          visitante: m.awayTeam.name,
-
-          golesLocal:
-            m.score?.fullTime?.home ?? 0,
-
-          golesVisitante:
-            m.score?.fullTime?.away ?? 0,
-
-          minuto:
-            m.minute || 0,
-
-          estado:
-            m.status
-
-        }));
-
-      res.json(partidosVivo);
+const finalizados = response.data.matches
+  .filter(m =>
+    m.status === "FINISHED"
+  )
+  .slice(-5);
 
     } catch (error) {
 
