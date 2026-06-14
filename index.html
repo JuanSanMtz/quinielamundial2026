@@ -1541,45 +1541,70 @@ async function cargarMarcadoresVivo(){
       "https://us-central1-quiniela-mundial-juansantos.cloudfunctions.net/obtenerMarcadoresVivo"
     );
 
-    const partidos = await res.json();
+    const data = await res.json();
 
     let html = "";
 
-    if(partidos.length === 0){
+    // EN VIVO
+    html += "<h3>🔴 En Vivo</h3>";
 
-      html = `
-        <div class="ranking-item">
-          No hay partidos en vivo
-        </div>
-      `;
+    if(data.vivo.length === 0){
+
+      html += "<div>No hay partidos en vivo</div>";
 
     }else{
 
-      partidos.forEach(p=>{
+      data.vivo.forEach(p=>{
 
         html += `
-
-        <div class="ranking-item">
-
-          <div>
-            ⚽ ${p.local}
+          <div class="ranking-item">
+            <div>⚽ ${p.homeTeam.name}</div>
+            <div>
+              ${p.score.fullTime.home ?? 0}
+              -
+              ${p.score.fullTime.away ?? 0}
+            </div>
+            <div>${p.awayTeam.name}</div>
           </div>
-
-          <div>
-            ${p.golesLocal} - ${p.golesVisitante}
-          </div>
-
-          <div>
-            ${p.visitante}
-          </div>
-
-        </div>
-
         `;
 
       });
 
     }
+
+    // PROGRAMADOS
+    html += "<h3 style='margin-top:15px'>🕒 Próximos</h3>";
+
+    data.programados.forEach(p=>{
+
+      html += `
+        <div class="ranking-item">
+          <div>${p.homeTeam.name}</div>
+          <div>vs</div>
+          <div>${p.awayTeam.name}</div>
+        </div>
+      `;
+
+    });
+
+    // FINALIZADOS
+    html += "<h3 style='margin-top:15px'>✅ Finalizados</h3>";
+
+    data.finalizados.forEach(p=>{
+
+      html += `
+        <div class="ranking-item">
+          <div>${p.homeTeam.name}</div>
+          <div>
+            ${p.score.fullTime.home}
+            -
+            ${p.score.fullTime.away}
+          </div>
+          <div>${p.awayTeam.name}</div>
+        </div>
+      `;
+
+    });
 
     document.getElementById(
       "marcadoresVivo"
