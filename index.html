@@ -224,6 +224,18 @@ button.guardar{
 
 <div class="container">
 
+<div class="card">
+
+  <h2>🔴 Marcadores en Vivo</h2>
+
+  <div id="marcadoresVivo">
+
+    Cargando marcadores...
+
+  </div>
+
+</div>
+
 <!-- PARTICIPANTE -->
 
 <div class="card">
@@ -1521,8 +1533,80 @@ async function cargarMisResultados(){
 
 }
 
+async function cargarMarcadoresVivo(){
+
+  try{
+
+    const res = await fetch(
+      "https://us-central1-quiniela-mundial-juansantos.cloudfunctions.net/obtenerMarcadoresVivo"
+    );
+
+    const partidos = await res.json();
+
+    let html = "";
+
+    if(partidos.length === 0){
+
+      html = `
+        <div class="ranking-item">
+          No hay partidos en vivo
+        </div>
+      `;
+
+    }else{
+
+      partidos.forEach(p=>{
+
+        html += `
+
+        <div class="ranking-item">
+
+          <div>
+            ⚽ ${p.local}
+          </div>
+
+          <div>
+            ${p.golesLocal} - ${p.golesVisitante}
+          </div>
+
+          <div>
+            ${p.visitante}
+          </div>
+
+        </div>
+
+        `;
+
+      });
+
+    }
+
+    document.getElementById(
+      "marcadoresVivo"
+    ).innerHTML = html;
+
+  }catch(error){
+
+    console.error(error);
+
+    document.getElementById(
+      "marcadoresVivo"
+    ).innerHTML =
+      "Error cargando marcadores";
+
+  }
+
+}
+
 window.onload = ()=>{
 
+   cargarMarcadoresVivo();
+
+  setInterval(
+    cargarMarcadoresVivo,
+    60000
+  );
+  
   const usuario =
     localStorage.getItem(
       "usuarioQuiniela"
