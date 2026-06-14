@@ -1,6 +1,7 @@
 const { onRequest } = require("firebase-functions/https");
 const admin = require("firebase-admin");
 const partidos = require("./partidos");
+const cors = require("cors")({ origin: true });
 
 admin.initializeApp();
 
@@ -108,8 +109,9 @@ exports.probarGrupoA = onRequest(async (req, res) => {
 
 });
 
-exports.actualizarResultadosMundial = onRequest(async (req, res) => {
+exports.actualizarResultadosMundial = onRequest((req, res) => {
 
+  cors(req, res, async () => {
   try {
 
     const response = await axios.get(
@@ -257,6 +259,8 @@ exports.actualizarResultadosMundial = onRequest(async (req, res) => {
     });
 
   }
+
+  });
 
 });
 
@@ -523,5 +527,61 @@ exports.calcularRanking = onRequest(async (req, res) => {
     });
 
   }
+
+});
+
+exports.obtenerMarcadoresVivo = onRequest((req, res) => {
+
+  cors(req, res, async () => {
+
+    try {
+
+      const response = await axios.get(
+        "https://api.football-data.org/v4/competitions/WC/matches",
+        {
+          headers: {
+            "X-Auth-Token": "10acb3f3f0d54f00851fcb9d933ad7ff"
+          }
+        }
+      );
+
+      const partidosVivo = response.data.matches
+        .filter(m =>
+          m.status === "LIVE" ||
+          m.status === "IN_PLAY" ||
+          m.status === "PAUSED"
+        )
+        .map(m => ({
+
+          id: m.id,
+
+          local: m.homeTeam.name,
+          visitante: m.awayTeam.name,
+
+          golesLocal:
+            m.score?.fullTime?.home ?? 0,
+
+          golesVisitante:
+            m.score?.fullTime?.away ?? 0,
+
+          minuto:
+            m.minute || 0,
+
+          estado:
+            m.status
+
+        }));
+
+      res.json(partidosVivo);
+
+    } catch (error) {
+
+      res.status(500).json({
+        error: error.message
+      });
+
+    }
+
+  });
 
 });
