@@ -260,6 +260,10 @@ Grupo A
 
 <select id="faseFinal">
 
+<option value="DIECISEISAVOS">
+DIECISEISAVOS
+</option>
+
 <option value="OCTAVOS">
 OCTAVOS
 </option>
@@ -270,6 +274,10 @@ CUARTOS
 
 <option value="SEMIFINAL">
 SEMIFINAL
+</option>
+
+<option value="TERCER_LUGAR">
+TERCER LUGAR
 </option>
 
 <option value="FINAL">
@@ -310,6 +318,10 @@ FINAL
   onchange="cargarPartidosFinales()"
 >
 
+<option value="DIECISEISAVOS">
+DIECISEISAVOS
+</option>
+
 <option value="OCTAVOS">
 OCTAVOS
 </option>
@@ -320,6 +332,10 @@ CUARTOS
 
 <option value="SEMIFINAL">
 SEMIFINAL
+</option>
+
+<option value="TERCER_LUGAR">
+TERCER LUGAR
 </option>
 
 <option value="FINAL">
@@ -762,23 +778,24 @@ async function crearPartidoFinal(){
 
   await firebaseSet(
 
-    firebaseRef(
-      db,
-      `fasesFinales/${fase}/${id}`
-    ),
+  firebaseRef(
+    db,
+    `fasesFinales/${fase}/${id}`
+  ),
 
-    {
+  {
 
-      id,
-      fase,
-      local,
-      visitante,
-      golesLocal:0,
-      golesVisitante:0
+    id,
+    fase,
+    local,
+    visitante,
+    golesLocal:0,
+    golesVisitante:0,
+    finalizado:false
 
-    }
+  }
 
-  );
+);
 
   document.getElementById(
     'equipoLocalFinal'
@@ -839,31 +856,40 @@ async function cargarPartidosFinales(){
 
     html += `
 
-    <div class="partido">
+<div class="partido">
 
-      <div class="team">
-        ${p.local}
-      </div>
+  <div class="team">
+    ${p.local}
+  </div>
 
-      <input
-        type="number"
-        id="fgl${p.id}"
-        value="${p.golesLocal}"
-      >
+  <input
+    type="number"
+    id="fgl${p.id}"
+    value="${p.golesLocal}"
+  >
 
-      <input
-        type="number"
-        id="fgv${p.id}"
-        value="${p.golesVisitante}"
-      >
+  <input
+    type="number"
+    id="fgv${p.id}"
+    value="${p.golesVisitante}"
+  >
 
-      <div class="team">
-        ${p.visitante}
-      </div>
+  <div class="team">
+    ${p.visitante}
+  </div>
 
-    </div>
+  <label style="display:flex;align-items:center;gap:5px;">
+    <input
+      type="checkbox"
+      id="ffin${p.id}"
+      ${p.finalizado ? "checked" : ""}
+    >
+    Finalizado
+  </label>
 
-    `;
+</div>
+
+`;
 
   });
 
@@ -897,32 +923,37 @@ async function guardarResultadosFinales(){
 
   for(const key in data){
 
-    data[key].golesLocal =
-      parseInt(
-        document.getElementById(
-          `fgl${data[key].id}`
-        ).value
-      );
-
-    data[key].golesVisitante =
-      parseInt(
-        document.getElementById(
-          `fgv${data[key].id}`
-        ).value
-      );
-
-    await firebaseSet(
-
-      firebaseRef(
-        db,
-        `fasesFinales/${fase}/${key}`
-      ),
-
-      data[key]
-
+  data[key].golesLocal =
+    parseInt(
+      document.getElementById(
+        `fgl${data[key].id}`
+      ).value
     );
 
-  }
+  data[key].golesVisitante =
+    parseInt(
+      document.getElementById(
+        `fgv${data[key].id}`
+      ).value
+    );
+
+  data[key].finalizado =
+    document.getElementById(
+      `ffin${data[key].id}`
+    ).checked;
+
+  await firebaseSet(
+
+    firebaseRef(
+      db,
+      `fasesFinales/${fase}/${key}`
+    ),
+
+    data[key]
+
+  );
+
+}
 
   alert(
     '🔥 Resultados finales guardados'
@@ -980,7 +1011,7 @@ async function calcularPuntos(){
 
       pronosticos.forEach((p)=>{
 
-        const real =
+       const real =
           resultadosGrupo.find(
             r =>
               Number(r.partidoId) ===
@@ -1023,11 +1054,13 @@ async function calcularPuntos(){
     }
 
     const fases = [
-      'OCTAVOS',
-      'CUARTOS',
-      'SEMIFINAL',
-      'FINAL'
-    ];
+  'DIECISEISAVOS',
+  'OCTAVOS',
+  'CUARTOS',
+  'SEMIFINAL',
+  'TERCER_LUGAR',
+  'FINAL'
+];
 
     const fasesUsuario =
       quinielas[usuario].fasesFinales || {};
@@ -1057,6 +1090,10 @@ async function calcularPuntos(){
           );
 
         if(!real) return;
+
+        if(real.finalizado !== true){
+          return;
+        }
 
         if(
           p.golesLocal === real.golesLocal &&

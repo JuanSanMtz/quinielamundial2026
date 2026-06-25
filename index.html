@@ -226,6 +226,19 @@ button.guardar{
 
 <div class="card">
 
+<h2>🔥 Así va la Quiniela</h2>
+
+<div id="radarPartido">
+
+Esperando un partido en vivo...
+
+</div>
+
+</div>
+
+
+<div class="card">
+
   <h2>🔴 Marcadores en Vivo</h2>
 
   <div id="marcadoresVivo">
@@ -315,7 +328,7 @@ Grupo A
   class="guardar"
   onclick="guardarFasesFinales()"
 >
-💾 Guardar Fases Finales
+💾 Guardar Pronósticos
 </button>
 
 </div>
@@ -817,11 +830,13 @@ async function guardarGrupo(){
 async function cargarFasesFinales(){
 
   const fases = [
-    'OCTAVOS',
-    'CUARTOS',
-    'SEMIFINAL',
-    'FINAL'
-  ];
+  'DIECISEISAVOS',
+  'OCTAVOS',
+  'CUARTOS',
+  'SEMIFINAL',
+  'TERCER_LUGAR',
+  'FINAL'
+];
 
   const usuario =
     document.getElementById(
@@ -846,7 +861,7 @@ async function cargarFasesFinales(){
     html += `
 
     <div class="fase-label">
-      🏆 ${fase}
+      🏆 ${fase.replace('DIECISEISAVOS','16AVOS DE FINAL').replace('TERCER_LUGAR','TERCER LUGAR')}
     </div>
 
     `;
@@ -940,7 +955,7 @@ async function cargarFasesFinales(){
       html += `
 
       <div class="grupo-bloqueado">
-        🔒 ${fase} guardado
+        🔒 ${fase.replace('DIECISEISAVOS','16AVOS DE FINAL').replace('TERCER_LUGAR','TERCER LUGAR')} guardado
       </div>
 
       `;
@@ -980,11 +995,13 @@ async function guardarFasesFinales(){
   }
 
   const fases = [
-    'OCTAVOS',
-    'CUARTOS',
-    'SEMIFINAL',
-    'FINAL'
-  ];
+  'DIECISEISAVOS',
+  'OCTAVOS',
+  'CUARTOS',
+  'SEMIFINAL',
+  'TERCER_LUGAR',
+  'FINAL'
+];
 
   for(const fase of fases){
 
@@ -1390,11 +1407,13 @@ async function cargarMisResultados(){
   /* FASES FINALES */
 
   const fases = [
-    'OCTAVOS',
-    'CUARTOS',
-    'SEMIFINAL',
-    'FINAL'
-  ];
+  'DIECISEISAVOS',
+  'OCTAVOS',
+  'CUARTOS',
+  'SEMIFINAL',
+  'TERCER_LUGAR',
+  'FINAL'
+];
 
   const finalesUsuario =
     quiniela.fasesFinales || {};
@@ -1498,7 +1517,7 @@ async function cargarMisResultados(){
       <tr class="${clase}">
 
         <td>
-          (${fase})
+          (${fase.replace('DIECISEISAVOS','16AVOS DE FINAL').replace('TERCER_LUGAR','TERCER LUGAR')})
           ${p.local} vs ${p.visitante}
         </td>
 
@@ -1607,36 +1626,75 @@ async function cargarMarcadoresVivo(){
     });
 
     document.getElementById(
-      "marcadoresVivo"
-    ).innerHTML = html;
+  "marcadoresVivo"
+).innerHTML = html;
+  
 
-  }catch(error){
+// NUEVO
+actualizarRadarPartido(data);
 
-    console.error(error);
+}catch(error){
 
-    document.getElementById(
-      "marcadoresVivo"
-    ).innerHTML =
-      "Error cargando marcadores";
+  console.error(error);
 
-  }
+  alert(error.stack);
+
+  document.getElementById(
+    "marcadoresVivo"
+  ).innerHTML =
+    "Error cargando marcadores";
 
 }
+}
+
+function actualizarRadarPartido(data){
+
+    if(!data.vivo || data.vivo.length === 0){
+
+        const radar = document.getElementById("radarPartido");
+
+        if(radar){
+
+            radar.innerHTML = `
+                <div style="text-align:center;padding:20px;">
+                    <h3>🔥 Así va la Quiniela</h3>
+                    <div style="font-size:18px;color:#666;margin-top:20px;">
+                        💤 No hay partidos en vivo
+                    </div>
+                    <div style="margin-top:10px;color:#999;">
+                        El radar se actualizará automáticamente cuando inicie el siguiente partido.
+                    </div>
+                </div>
+            `;
+
+        }
+
+        return;
+    }
+
+    actualizarRadar(data.vivo[0]);
+
+}
+
 
 window.onload = ()=>{
 
    cargarMarcadoresVivo();
 
-  setInterval(
-    cargarMarcadoresVivo,
-    60000
-  );
-  
-  const usuario =
-    localStorage.getItem(
-      "usuarioQuiniela"
-    );
+   // NUEVO
+   cargarTodasLasQuinielas();
 
+   setInterval(
+      cargarMarcadoresVivo,
+      60000
+   );
+
+   const usuario =
+      localStorage.getItem(
+         "usuarioQuiniela"
+      );
+
+   
   if(usuario){
 
     document.getElementById(
@@ -1657,6 +1715,17 @@ window.onload = ()=>{
 
 };
 
+</script>
+
+<script>
+console.log("ANTES");
+</script>
+
+<script src="js/radar.js"></script>
+
+<script>
+console.log("DESPUÉS");
+console.log("actualizarRadar:", typeof actualizarRadar);
 </script>
 
 <script type="module">

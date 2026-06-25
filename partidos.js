@@ -781,3 +781,4 @@ const partidos = [
 
 
 console.log("🔥 Total partidos:", partidos.length);
+window.partidos = partidos;
