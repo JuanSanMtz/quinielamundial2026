@@ -1648,7 +1648,9 @@ actualizarRadarPartido(data);
 }
 
 function actualizarRadarPartido(data){
-
+console.log("Entró a actualizarRadarPartido");
+console.log(data.vivo);
+console.log("Llamando actualizarRadar...");
     if(!data.vivo || data.vivo.length === 0){
 
         const radar = document.getElementById("radarPartido");

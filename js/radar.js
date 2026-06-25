@@ -60,8 +60,10 @@ async function cargarTodasLasQuinielas(){
 }
 
 function actualizarRadar(partido){
-
+    console.log("Entró a actualizarRadar");
     const infoPartido = obtenerPartidoSistema(partido);
+
+    console.log("infoPartido =", infoPartido);
 
     if(!infoPartido) return;
 
@@ -268,33 +270,78 @@ function obtenerPartidoSistema(partidoVivo){
         }
 
     }
-
+    console.log(
+    "No encontró:",
+    local,
+    "-",
+    visitante
+);
     return null;
 
 }
 function normalizarNombreEquipo(nombre){
 
-    const mapa = {
+    const equivalencias = {
 
-        "Germany":"Alemania",
-        "Mexico":"México",
-        "Japan":"Japón",
-        "South Korea":"República de Corea",
-        "Czechia":"Chequia",
-        "Netherlands":"Países Bajos",
-        "Ivory Coast":"Costa de Marfil",
-        "Curacao":"Curazao",
-        "Cape Verde Islands":"Islas de Cabo Verde",
-        "Saudi Arabia":"Arabia Saudí",
-        "Iran":"RI de Irán",
-        "Bosnia-Herzegovina":"Bosnia y Herzegovina",
-        "United States":"EE. UU.",
-        "Turkey":"Turquía",
-        "Congo DR":"RD Congo"
+    "Germany":"Alemania",
+    "Mexico":"México",
+    "Japan":"Japón",
+    "South Korea":"República de Corea",
+    "Czechia":"Chequia",
+    "Netherlands":"Países Bajos",
+    "Ivory Coast":"Costa de Marfil",
+    "Curacao":"Curazao",
+    "Cape Verde Islands":"Islas de Cabo Verde",
+    "Cape Verde":"Islas de Cabo Verde",
+    "Saudi Arabia":"Arabia Saudí",
+    "Iran":"RI de Irán",
+    "IR Iran":"RI de Irán",
+    "Bosnia-Herzegovina":"Bosnia y Herzegovina",
+    "Bosnia and Herzegovina":"Bosnia y Herzegovina",
+    "United States":"EE. UU.",
+    "USA":"EE. UU.",
+    "Turkey":"Turquía",
+    "Congo DR":"RD Congo",
+    "DR Congo":"RD Congo",
+    "Tunisia":"Túnez",
 
-    };
+    // Por si la API usa estos nombres
+    "South Africa":"Sudáfrica",
+    "Switzerland":"Suiza",
+    "Sweden":"Suecia",
+    "Scotland":"Escocia",
+    "Morocco":"Marruecos",
+    "Brazil":"Brasil",
+    "Haiti":"Haití",
+    "Australia":"Australia",
+    "Paraguay":"Paraguay",
+    "Belgium":"Bélgica",
+    "Egypt":"Egipto",
+    "New Zealand":"Nueva Zelanda",
+    "Spain":"España",
+    "Uruguay":"Uruguay",
+    "France":"Francia",
+    "Senegal":"Senegal",
+    "Iraq":"Irak",
+    "Norway":"Noruega",
+    "Argentina":"Argentina",
+    "Algeria":"Argelia",
+    "Austria":"Austria",
+    "Jordan":"Jordania",
+    "Portugal":"Portugal",
+    "Uzbekistan":"Uzbekistán",
+    "Colombia":"Colombia",
+    "England":"Inglaterra",
+    "Croatia":"Croacia",
+    "Ghana":"Ghana",
+    "Panama":"Panamá",
+    "Qatar":"Catar",
+    "Ecuador":"Ecuador",
+    "Canada":"Canadá"
 
-    return mapa[nombre] || nombre;
+};
+
+return equivalencias[nombre.trim()] || nombre.trim();
 
 }
 window.actualizarRadar = actualizarRadar;
