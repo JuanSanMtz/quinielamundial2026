@@ -1139,13 +1139,609 @@ async function calcularPuntos(){
     );
 
   }
-
+  await calcularRankingDieciseisavos();
   cargarRankingTabla();
-
   alert('🔥 Ranking actualizado');
+ 
+}
+
+
+async function calcularRankingDieciseisavos(){
+
+  // Resultados oficiales
+  const resResultados = await fetch(
+    "https://quiniela-mundial-juansantos-default-rtdb.firebaseio.com/fasesFinales/DIECISEISAVOS.json"
+  );
+
+  const resultados = await resResultados.json();
+
+  if(!resultados){
+    alert("No existen partidos de Dieciseisavos");
+    return;
+  }
+
+  // Quinielas
+  const resQuinielas = await fetch(
+    "https://quiniela-mundial-juansantos-default-rtdb.firebaseio.com/quinielas.json"
+  );
+
+  const quinielas = await resQuinielas.json();
+
+  if(!quinielas){
+    alert("No existen quinielas");
+    return;
+  }
+
+  for(const usuario in quinielas){
+
+    let puntos = 0;
+    let exactos = 0;
+
+    const pronosticos =
+      quinielas[usuario]
+      ?.fasesFinales
+      ?.DIECISEISAVOS
+      ?.pronosticos || [];
+
+    pronosticos.forEach((p)=>{
+
+      const real = Object.values(resultados).find(r =>
+        Number(r.id) === Number(p.partidoId)
+      );
+
+      if(!real) return;
+
+      if(real.finalizado !== true) return;
+
+      // Marcador exacto
+      if(
+        Number(p.golesLocal) === Number(real.golesLocal) &&
+        Number(p.golesVisitante) === Number(real.golesVisitante)
+      ){
+        puntos += 2;
+        exactos++;
+        return;
+      }
+
+      let resultadoPronostico = "E";
+
+      if(p.golesLocal > p.golesVisitante){
+        resultadoPronostico = "L";
+      }else if(p.golesLocal < p.golesVisitante){
+        resultadoPronostico = "V";
+      }
+
+      let resultadoReal = "E";
+
+      if(real.golesLocal > real.golesVisitante){
+        resultadoReal = "L";
+      }else if(real.golesLocal < real.golesVisitante){
+        resultadoReal = "V";
+      }
+
+      if(resultadoPronostico === resultadoReal){
+        puntos++;
+      }
+
+    });
+
+    await firebaseSet(
+
+      firebaseRef(
+        db,
+        `rankingFases/DIECISEISAVOS/${usuario}`
+      ),
+
+      {
+        usuario,
+        puntos,
+        exactos
+      }
+
+    );
+
+  }
+
+  alert("✅ Ranking Dieciseisavos actualizado");
 
 }
 
+async function calcularRankingOCTAVOS(){
+
+  // Resultados oficiales
+  const resResultados = await fetch(
+    "https://quiniela-mundial-juansantos-default-rtdb.firebaseio.com/fasesFinales/OCTAVOS.json"
+  );
+
+  const resultados = await resResultados.json();
+
+  if(!resultados){
+    alert("No existen partidos de Octavos");
+    return;
+  }
+
+  // Quinielas
+  const resQuinielas = await fetch(
+    "https://quiniela-mundial-juansantos-default-rtdb.firebaseio.com/quinielas.json"
+  );
+
+  const quinielas = await resQuinielas.json();
+
+  if(!quinielas){
+    alert("No existen quinielas");
+    return;
+  }
+
+  for(const usuario in quinielas){
+
+    let puntos = 0;
+    let exactos = 0;
+
+    const pronosticos =
+      quinielas[usuario]
+      ?.fasesFinales
+      ?.OCTAVOS
+      ?.pronosticos || [];
+
+    pronosticos.forEach((p)=>{
+
+      const real = Object.values(resultados).find(r =>
+        Number(r.id) === Number(p.partidoId)
+      );
+
+      if(!real) return;
+
+      if(real.finalizado !== true) return;
+
+      // Marcador exacto
+      if(
+        Number(p.golesLocal) === Number(real.golesLocal) &&
+        Number(p.golesVisitante) === Number(real.golesVisitante)
+      ){
+        puntos += 2;
+        exactos++;
+        return;
+      }
+
+      let resultadoPronostico = "E";
+
+      if(p.golesLocal > p.golesVisitante){
+        resultadoPronostico = "L";
+      }else if(p.golesLocal < p.golesVisitante){
+        resultadoPronostico = "V";
+      }
+
+      let resultadoReal = "E";
+
+      if(real.golesLocal > real.golesVisitante){
+        resultadoReal = "L";
+      }else if(real.golesLocal < real.golesVisitante){
+        resultadoReal = "V";
+      }
+
+      if(resultadoPronostico === resultadoReal){
+        puntos++;
+      }
+
+    });
+
+    await firebaseSet(
+
+      firebaseRef(
+        db,
+        `rankingFases/OCTAVOS/${usuario}`
+      ),
+
+      {
+        usuario,
+        puntos,
+        exactos
+      }
+
+    );
+
+  }
+
+  alert("✅ Ranking OCTAVOS actualizado");
+
+}
+async function calcularRankingCUARTOS(){
+
+  // Resultados oficiales
+  const resResultados = await fetch(
+    "https://quiniela-mundial-juansantos-default-rtdb.firebaseio.com/fasesFinales/CUARTOS.json"
+  );
+
+  const resultados = await resResultados.json();
+
+  if(!resultados){
+    alert("No existen partidos de Cuartos");
+    return;
+  }
+
+  // Quinielas
+  const resQuinielas = await fetch(
+    "https://quiniela-mundial-juansantos-default-rtdb.firebaseio.com/quinielas.json"
+  );
+
+  const quinielas = await resQuinielas.json();
+
+  if(!quinielas){
+    alert("No existen quinielas");
+    return;
+  }
+
+  for(const usuario in quinielas){
+
+    let puntos = 0;
+    let exactos = 0;
+
+    const pronosticos =
+      quinielas[usuario]
+      ?.fasesFinales
+      ?.DIECISEISAVOS
+      ?.pronosticos || [];
+
+    pronosticos.forEach((p)=>{
+
+      const real = Object.values(resultados).find(r =>
+        Number(r.id) === Number(p.partidoId)
+      );
+
+      if(!real) return;
+
+      if(real.finalizado !== true) return;
+
+      // Marcador exacto
+      if(
+        Number(p.golesLocal) === Number(real.golesLocal) &&
+        Number(p.golesVisitante) === Number(real.golesVisitante)
+      ){
+        puntos += 2;
+        exactos++;
+        return;
+      }
+
+      let resultadoPronostico = "E";
+
+      if(p.golesLocal > p.golesVisitante){
+        resultadoPronostico = "L";
+      }else if(p.golesLocal < p.golesVisitante){
+        resultadoPronostico = "V";
+      }
+
+      let resultadoReal = "E";
+
+      if(real.golesLocal > real.golesVisitante){
+        resultadoReal = "L";
+      }else if(real.golesLocal < real.golesVisitante){
+        resultadoReal = "V";
+      }
+
+      if(resultadoPronostico === resultadoReal){
+        puntos++;
+      }
+
+    });
+
+    await firebaseSet(
+
+      firebaseRef(
+        db,
+        `rankingFases/CUARTOS/${usuario}`
+      ),
+
+      {
+        usuario,
+        puntos,
+        exactos
+      }
+
+    );
+
+  }
+
+  alert("✅ Ranking de Cuartos actualizado");
+
+}
+
+async function calcularRankingSEMIFINAL(){
+
+  // Resultados oficiales
+  const resResultados = await fetch(
+    "https://quiniela-mundial-juansantos-default-rtdb.firebaseio.com/fasesFinales/SEMIFINAL.json"
+  );
+
+  const resultados = await resResultados.json();
+
+  if(!resultados){
+    alert("No existen partidos de Semifinal");
+    return;
+  }
+
+  // Quinielas
+  const resQuinielas = await fetch(
+    "https://quiniela-mundial-juansantos-default-rtdb.firebaseio.com/quinielas.json"
+  );
+
+  const quinielas = await resQuinielas.json();
+
+  if(!quinielas){
+    alert("No existen quinielas");
+    return;
+  }
+
+  for(const usuario in quinielas){
+
+    let puntos = 0;
+    let exactos = 0;
+
+    const pronosticos =
+      quinielas[usuario]
+      ?.fasesFinales
+      ?.DIECISEISAVOS
+      ?.pronosticos || [];
+
+    pronosticos.forEach((p)=>{
+
+      const real = Object.values(resultados).find(r =>
+        Number(r.id) === Number(p.partidoId)
+      );
+
+      if(!real) return;
+
+      if(real.finalizado !== true) return;
+
+      // Marcador exacto
+      if(
+        Number(p.golesLocal) === Number(real.golesLocal) &&
+        Number(p.golesVisitante) === Number(real.golesVisitante)
+      ){
+        puntos += 2;
+        exactos++;
+        return;
+      }
+
+      let resultadoPronostico = "E";
+
+      if(p.golesLocal > p.golesVisitante){
+        resultadoPronostico = "L";
+      }else if(p.golesLocal < p.golesVisitante){
+        resultadoPronostico = "V";
+      }
+
+      let resultadoReal = "E";
+
+      if(real.golesLocal > real.golesVisitante){
+        resultadoReal = "L";
+      }else if(real.golesLocal < real.golesVisitante){
+        resultadoReal = "V";
+      }
+
+      if(resultadoPronostico === resultadoReal){
+        puntos++;
+      }
+
+    });
+
+    await firebaseSet(
+
+      firebaseRef(
+        db,
+        `rankingFases/SEMIFINAL/${usuario}`
+      ),
+
+      {
+        usuario,
+        puntos,
+        exactos
+      }
+
+    );
+
+  }
+
+  alert("✅ Ranking de Semifinal actualizado");
+
+}
+async function calcularRankingTERCERLUGAR(){
+
+  // Resultados oficiales
+  const resResultados = await fetch(
+    "https://quiniela-mundial-juansantos-default-rtdb.firebaseio.com/fasesFinales/TERCERLUGAR.json"
+  );
+
+  const resultados = await resResultados.json();
+
+  if(!resultados){
+    alert("No existen partidos de Tercer Lugar");
+    return;
+  }
+
+  // Quinielas
+  const resQuinielas = await fetch(
+    "https://quiniela-mundial-juansantos-default-rtdb.firebaseio.com/quinielas.json"
+  );
+
+  const quinielas = await resQuinielas.json();
+
+  if(!quinielas){
+    alert("No existen quinielas");
+    return;
+  }
+
+  for(const usuario in quinielas){
+
+    let puntos = 0;
+    let exactos = 0;
+
+    const pronosticos =
+      quinielas[usuario]
+      ?.fasesFinales
+      ?.DIECISEISAVOS
+      ?.pronosticos || [];
+
+    pronosticos.forEach((p)=>{
+
+      const real = Object.values(resultados).find(r =>
+        Number(r.id) === Number(p.partidoId)
+      );
+
+      if(!real) return;
+
+      if(real.finalizado !== true) return;
+
+      // Marcador exacto
+      if(
+        Number(p.golesLocal) === Number(real.golesLocal) &&
+        Number(p.golesVisitante) === Number(real.golesVisitante)
+      ){
+        puntos += 2;
+        exactos++;
+        return;
+      }
+
+      let resultadoPronostico = "E";
+
+      if(p.golesLocal > p.golesVisitante){
+        resultadoPronostico = "L";
+      }else if(p.golesLocal < p.golesVisitante){
+        resultadoPronostico = "V";
+      }
+
+      let resultadoReal = "E";
+
+      if(real.golesLocal > real.golesVisitante){
+        resultadoReal = "L";
+      }else if(real.golesLocal < real.golesVisitante){
+        resultadoReal = "V";
+      }
+
+      if(resultadoPronostico === resultadoReal){
+        puntos++;
+      }
+
+    });
+
+    await firebaseSet(
+
+      firebaseRef(
+        db,
+        `rankingFases/TERCERLUGAR/${usuario}`
+      ),
+
+      {
+        usuario,
+        puntos,
+        exactos
+      }
+
+    );
+
+  }
+
+  alert("✅ Ranking de Tercer Lugar actualizado");
+
+}
+async function calcularRankingFINAL(){
+
+  // Resultados oficiales
+  const resResultados = await fetch(
+    "https://quiniela-mundial-juansantos-default-rtdb.firebaseio.com/fasesFinales/FINAL.json"
+  );
+
+  const resultados = await resResultados.json();
+
+  if(!resultados){
+    alert("No existen partidos de Final");
+    return;
+  }
+
+  // Quinielas
+  const resQuinielas = await fetch(
+    "https://quiniela-mundial-juansantos-default-rtdb.firebaseio.com/quinielas.json"
+  );
+
+  const quinielas = await resQuinielas.json();
+
+  if(!quinielas){
+    alert("No existen quinielas");
+    return;
+  }
+
+  for(const usuario in quinielas){
+
+    let puntos = 0;
+    let exactos = 0;
+
+    const pronosticos =
+      quinielas[usuario]
+      ?.fasesFinales
+      ?.DIECISEISAVOS
+      ?.pronosticos || [];
+
+    pronosticos.forEach((p)=>{
+
+      const real = Object.values(resultados).find(r =>
+        Number(r.id) === Number(p.partidoId)
+      );
+
+      if(!real) return;
+
+      if(real.finalizado !== true) return;
+
+      // Marcador exacto
+      if(
+        Number(p.golesLocal) === Number(real.golesLocal) &&
+        Number(p.golesVisitante) === Number(real.golesVisitante)
+      ){
+        puntos += 2;
+        exactos++;
+        return;
+      }
+
+      let resultadoPronostico = "E";
+
+      if(p.golesLocal > p.golesVisitante){
+        resultadoPronostico = "L";
+      }else if(p.golesLocal < p.golesVisitante){
+        resultadoPronostico = "V";
+      }
+
+      let resultadoReal = "E";
+
+      if(real.golesLocal > real.golesVisitante){
+        resultadoReal = "L";
+      }else if(real.golesLocal < real.golesVisitante){
+        resultadoReal = "V";
+      }
+
+      if(resultadoPronostico === resultadoReal){
+        puntos++;
+      }
+
+    });
+
+    await firebaseSet(
+
+      firebaseRef(
+        db,
+        `rankingFases/FINAL/${usuario}`
+      ),
+
+      {
+        usuario,
+        puntos,
+        exactos
+      }
+
+    );
+
+  }
+
+  alert("✅ Ranking de Final actualizado");
+
+}
 
 /* =========================================
    CARGAR RANKING

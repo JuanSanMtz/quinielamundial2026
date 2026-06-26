@@ -318,11 +318,22 @@ Grupo A
 
 <!-- FASES -->
 
+<!-- FASES -->
+
 <div class="card">
 
 <h2>🏆 Fases Finales</h2>
 
 <div id="fasesFinales"></div>
+
+<select id="verFase" style="display:none;">
+  <option value="DIECISEISAVOS">16AVOS</option>
+  <option value="OCTAVOS">OCTAVOS</option>
+  <option value="CUARTOS">CUARTOS</option>
+  <option value="SEMIFINAL">SEMIFINAL</option>
+  <option value="TERCER_LUGAR">TERCER LUGAR</option>
+  <option value="FINAL">FINAL</option>
+</select>
 
 <button
   class="guardar"
@@ -884,7 +895,6 @@ async function cargarFasesFinales(){
     ).value;
 
   let html = '';
-
   for(const fase of fases){
 
     const res = await fetch(
@@ -989,18 +999,26 @@ async function cargarFasesFinales(){
       `;
 
     });
+console.log("pronosticosGuardados:", pronosticosGuardados);
+   if(pronosticosGuardados){
 
-    if(pronosticosGuardados){
+  html += `
 
-      html += `
+  <div class="grupo-bloqueado">
+    🔒 ${fase.replace('DIECISEISAVOS','16AVOS DE FINAL').replace('TERCER_LUGAR','TERCER LUGAR')} guardado
+  </div>
 
-      <div class="grupo-bloqueado">
-        🔒 ${fase.replace('DIECISEISAVOS','16AVOS DE FINAL').replace('TERCER_LUGAR','TERCER LUGAR')} guardado
-      </div>
+  `;
 
-      `;
+}
 
-    }
+else{
+
+    document.getElementById("verFase").value = fase;
+
+    break;
+
+}
 
   }
 
@@ -1018,8 +1036,7 @@ async function cargarFasesFinales(){
 }
 
 async function guardarFasesFinales(){
-
-  const usuario =
+const usuario =
     document.getElementById(
       "usuario"
     ).value;
@@ -1034,16 +1051,12 @@ async function guardarFasesFinales(){
 
   }
 
-  const fases = [
-  'DIECISEISAVOS',
-  'OCTAVOS',
-  'CUARTOS',
-  'SEMIFINAL',
-  'TERCER_LUGAR',
-  'FINAL'
-];
+  const fase =
+  document.getElementById(
+    "verFase"
+  ).value;
 
-  for(const fase of fases){
+  
 
     const res = await fetch(
 
@@ -1054,7 +1067,10 @@ async function guardarFasesFinales(){
     const data =
       await res.json();
 
-    if(!data) continue;
+    if(!data){
+  alert("No hay partidos para esta fase.");
+  return;
+}
 
     const yaGuardado = await fetch(
 
@@ -1067,9 +1083,10 @@ async function guardarFasesFinales(){
 
     if(existe){
 
-      continue;
+  alert("Ya guardaste esta fase.");
+  return;
 
-    }
+}
 
     let pronosticos = [];
 
@@ -1116,7 +1133,7 @@ async function guardarFasesFinales(){
 
     );
 
-  }
+  
 
   cargarFasesFinales();
 
@@ -1125,9 +1142,7 @@ async function guardarFasesFinales(){
   alert(
     '🔥 Fases finales guardadas'
   );
-
-}
-
+    }
 async function obtenerFaseActual(){
 
   // FASE 1 - Grupos
