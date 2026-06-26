@@ -3,6 +3,8 @@ console.log("typeof partidos:", typeof partidos);
 console.log("✅ actualizarRadar registrada");
 
 let todasLasQuinielas = {};
+let resultadosSistema = {};
+let fasesSistema = {};
 function mostrarRadarPrueba() {
 
     const radar = document.getElementById("radarPartido");
@@ -59,31 +61,34 @@ async function cargarTodasLasQuinielas(){
 
 }
 
-function actualizarRadar(partido){
-    console.log("Entró a actualizarRadar");
+function generarRadarHTML(partido){
+
+    console.log("Entró a generarRadarHTML");
+
     const infoPartido = obtenerPartidoSistema(partido);
 
     console.log("infoPartido =", infoPartido);
 
-    if(!infoPartido) return;
+    if(!infoPartido) return "";
 
     const partidoSistema = infoPartido.partido;
 
-    const aciertos = buscarAciertos(partidoSistema, partido);
-
-    const radar = document.getElementById("radarPartido");
-
-    if(!radar) return;
+    const aciertos = buscarAciertos(partidoSistema, partido, infoPartido.invertido);
 
     const exactos = aciertos.exactos;
 
-    const ganador = aciertos.ganador.filter(
-        n => !exactos.includes(n)
-    );
+    const ganador = aciertos.ganador;
+    console.log("🏟️ Partido:", partido.homeTeam.name, "vs", partido.awayTeam.name);
+    console.log("🎯 Exactos:", exactos);
+    console.log("⚽ Ganador:", ganador);
+    return `
 
-    radar.innerHTML = `
-
-    <div style="text-align:center;">
+    <div style="
+        text-align:center;
+        margin-bottom:30px;
+        padding-bottom:20px;
+        border-bottom:1px solid #ddd;
+    ">
 
         <h3>🔥 ASÍ VA LA QUINIELA</h3>
 
@@ -120,38 +125,78 @@ function actualizarRadar(partido){
             ${
                 exactos.length
                 ? exactos.slice(0,3).map((n,i)=>
-
                     `${["🥇","🥈","🥉"][i]} ${n}`
-
                 ).join("<br>")
                 : "<span style='color:#888'>Nadie por ahora</span>"
             }
 
             ${
-                exactos.length>3
-                ? `<br><br><b>... y ${exactos.length-3} participantes más</b>`
-                : ""
-            }
+exactos.length > 3
+? `
+<br><br>
+
+<details>
+
+<summary style="
+cursor:pointer;
+color:#1e3c72;
+font-weight:bold;
+">
+
+🎯 Ver los ${exactos.length-3} restantes
+
+</summary>
+
+<div style="margin-top:10px;">
+
+${exactos.slice(3).map(n=>`👤 ${n}`).join("<br>")}
+
+</div>
+
+</details>
+`
+: ""
+}
 
             <br><br>
 
-            <h4>⚽ También acertan el ganador</h4>
+            <h4>⚽ También aciertan el ganador</h4>
 
             ${
                 ganador.length
                 ? ganador.slice(0,3).map(n=>
-
                     `👤 ${n}`
-
                 ).join("<br>")
                 : "<span style='color:#888'>Nadie</span>"
             }
 
             ${
-                ganador.length>3
-                ? `<br><br><b>... y ${ganador.length-3} participantes más</b>`
-                : ""
-            }
+ganador.length > 3
+? `
+<br><br>
+
+<details>
+
+<summary style="
+cursor:pointer;
+color:#1e3c72;
+font-weight:bold;
+">
+
+👥 Ver los ${ganador.length-3} restantes
+
+</summary>
+
+<div style="margin-top:10px;">
+
+${ganador.slice(3).map(n=>`👤 ${n}`).join("<br>")}
+
+</div>
+
+</details>
+`
+: ""
+}
 
         </div>
 
@@ -161,7 +206,7 @@ function actualizarRadar(partido){
 
 }
 
-function buscarAciertos(partidoSistema, partidoVivo){
+function buscarAciertos(partidoSistema, partidoVivo, invertido = false){
 
     const exactos = [];
     const ganador = [];
@@ -170,8 +215,13 @@ function buscarAciertos(partidoSistema, partidoVivo){
         return { exactos, ganador };
     }
 
-    const golesLocal = partidoVivo.score.fullTime.home ?? 0;
-    const golesVisitante = partidoVivo.score.fullTime.away ?? 0;
+    let golesLocal = partidoVivo.score.fullTime.home ?? 0;
+let golesVisitante = partidoVivo.score.fullTime.away ?? 0;
+
+// Si el partido viene invertido, intercambiamos los goles
+if(invertido){
+    [golesLocal, golesVisitante] = [golesVisitante, golesLocal];
+}
 
     let resultadoActual = "E";
 
@@ -199,17 +249,19 @@ function buscarAciertos(partidoSistema, partidoVivo){
                     continue;
                 }
 
-                // Marcador exacto
-                if(
-                    Number(pronostico.golesLocal) === golesLocal &&
-                    Number(pronostico.golesVisitante) === golesVisitante
-                ){
+           // Marcador exacto
+if(
+    Number(pronostico.golesLocal) === golesLocal &&
+    Number(pronostico.golesVisitante) === golesVisitante
+){
 
-                    exactos.push(nombre);
-                    continue;
+    if(!exactos.includes(nombre)){
+        exactos.push(nombre);
+    }
 
-                }
+    continue;
 
+}
                 // Resultado (Local / Empate / Visitante)
                 let resultadoPronostico = "E";
 
@@ -220,8 +272,19 @@ function buscarAciertos(partidoSistema, partidoVivo){
                 }
 
                 if(resultadoPronostico === resultadoActual){
-                    ganador.push(nombre);
-                }
+
+    console.log(
+        "✅ Acierta ganador:",
+        nombre,
+        pronostico.local,
+        pronostico.golesLocal + "-" + pronostico.golesVisitante
+    );
+
+    if(!ganador.includes(nombre)){
+        ganador.push(nombre);
+    }
+
+}
 
             }
 
@@ -344,4 +407,4 @@ function normalizarNombreEquipo(nombre){
 return equivalencias[nombre.trim()] || nombre.trim();
 
 }
-window.actualizarRadar = actualizarRadar;
+window.generarRadarHTML = generarRadarHTML;

@@ -339,7 +339,47 @@ Grupo A
 
 <h2>🏆 Ranking</h2>
 
-<div id="ranking"></div>
+<div id="ranking">
+<details open>
+<summary><b>🥇 Fase 1 - Grupos (A-L)</b></summary>
+<div id="rankingFase1"></div>
+</details>
+
+<details>
+<summary><b>⚔️ Fase 2 - Dieciseisavos</b></summary>
+<div id="rankingFase2">Sin resultados todavía.</div>
+</details>
+
+<details>
+<summary><b>⚔️ Fase 3 - Octavos</b></summary>
+<div id="rankingFase3">Sin resultados todavía.</div>
+</details>
+
+<details>
+<summary><b>⚔️ Fase 4 - Cuartos</b></summary>
+<div id="rankingFase4">Sin resultados todavía.</div>
+</details>
+
+<details>
+<summary><b>⚔️ Fase 5 - Semifinal</b></summary>
+<div id="rankingFase5">Sin resultados todavía.</div>
+</details>
+
+<details>
+<summary><b>🥉 Fase 6 - Tercer Lugar</b></summary>
+<div id="rankingFase6">Sin resultados todavía.</div>
+</details>
+
+<details>
+<summary><b>👑 Fase 7 - Final</b></summary>
+<div id="rankingFase7">Sin resultados todavía.</div>
+</details>
+
+<details>
+<summary><b>🌎 Ranking Acumulado</b></summary>
+<div id="rankingAcumulado">Disponible al finalizar varias fases.</div>
+</details>
+</div>
 
 </div>
 
@@ -1088,8 +1128,79 @@ async function guardarFasesFinales(){
 
 }
 
-async function cargarRanking(){
+async function obtenerFaseActual(){
 
+  // FASE 1 - Grupos
+  const resResultados = await fetch(
+    "https://quiniela-mundial-juansantos-default-rtdb.firebaseio.com/resultados.json"
+  );
+
+  const resultados = await resResultados.json();
+
+  let gruposTerminados = true;
+
+  for(const grupo in resultados){
+
+    for(const partido of resultados[grupo]){
+
+      if(partido.finalizado !== true){
+        gruposTerminados = false;
+      }
+
+    }
+
+  }
+
+  if(!gruposTerminados){
+    return 1;
+  }
+
+  // FASE 2 - Dieciseisavos
+  const fases = [
+    "DIECISEISAVOS",
+    "OCTAVOS",
+    "CUARTOS",
+    "SEMIFINAL",
+    "TERCER_LUGAR",
+    "FINAL"
+  ];
+
+  for(let i=0;i<fases.length;i++){
+
+    const res = await fetch(
+      `https://quiniela-mundial-juansantos-default-rtdb.firebaseio.com/fasesFinales/${fases[i]}.json`
+    );
+
+    const data = await res.json();
+
+    if(!data){
+      return i+2;
+    }
+
+    let terminada = true;
+
+    Object.values(data).forEach(p=>{
+
+      if(p.finalizado !== true){
+        terminada = false;
+      }
+
+    });
+
+    if(!terminada){
+      return i+2;
+    }
+
+  }
+
+  return 7;
+
+}
+
+async function cargarRanking(){
+const faseActual = await obtenerFaseActual();
+
+console.log("Fase actual:", faseActual);
   try{
 
     const res =
@@ -1215,9 +1326,7 @@ async function cargarRanking(){
 
     }
 
-    document.getElementById(
-      "ranking"
-    ).innerHTML = html;
+    document.getElementById("rankingFase1").innerHTML = html;
 
   }catch(e){
 
@@ -1648,9 +1757,10 @@ actualizarRadarPartido(data);
 }
 
 function actualizarRadarPartido(data){
-console.log("Entró a actualizarRadarPartido");
-console.log(data.vivo);
-console.log("Llamando actualizarRadar...");
+
+    console.log("Entró a actualizarRadarPartido");
+    console.log(data.vivo);
+
     if(!data.vivo || data.vivo.length === 0){
 
         const radar = document.getElementById("radarPartido");
@@ -1659,7 +1769,7 @@ console.log("Llamando actualizarRadar...");
 
             radar.innerHTML = `
                 <div style="text-align:center;padding:20px;">
-                    <h3>🔥 Así va la Quiniela</h3>
+                    
                     <div style="font-size:18px;color:#666;margin-top:20px;">
                         💤 No hay partidos en vivo
                     </div>
@@ -1674,7 +1784,17 @@ console.log("Llamando actualizarRadar...");
         return;
     }
 
-    actualizarRadar(data.vivo[0]);
+    const radar = document.getElementById("radarPartido");
+
+    let html = "";
+
+    data.vivo.forEach(partido => {
+
+        html += generarRadarHTML(partido);
+
+    });
+
+    radar.innerHTML = html;
 
 }
 
