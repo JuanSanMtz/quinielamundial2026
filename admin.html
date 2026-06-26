@@ -276,7 +276,7 @@ CUARTOS
 SEMIFINAL
 </option>
 
-<option value="TERCER_LUGAR">
+<option value="TERCERLUGAR">
 TERCER LUGAR
 </option>
 
@@ -334,7 +334,7 @@ CUARTOS
 SEMIFINAL
 </option>
 
-<option value="TERCER_LUGAR">
+<option value="TERCERLUGAR">
 TERCER LUGAR
 </option>
 
@@ -420,6 +420,13 @@ FINAL
   onclick="borrarFasesFinales()"
 >
 🏆 Borrar Fases Finales
+</button>
+
+<button
+  class="btn-danger"
+  onclick="borrarRankingFases()"
+>
+🏆 Borrar Ranking Fases
 </button>
 
 <hr>
@@ -1058,7 +1065,7 @@ async function calcularPuntos(){
   'OCTAVOS',
   'CUARTOS',
   'SEMIFINAL',
-  'TERCER_LUGAR',
+  'TERCERLUGAR',
   'FINAL'
 ];
 
@@ -1140,8 +1147,20 @@ async function calcularPuntos(){
 
   }
   await calcularRankingDieciseisavos();
-  cargarRankingTabla();
-  alert('🔥 Ranking actualizado');
+
+await calcularRankingOCTAVOS();
+
+await calcularRankingCUARTOS();
+
+await calcularRankingSEMIFINAL();
+
+await calcularRankingTERCERLUGAR();
+
+await calcularRankingFINAL();
+
+cargarRankingTabla();
+
+alert('🔥 Ranking actualizado');
  
 }
 
@@ -1379,7 +1398,7 @@ async function calcularRankingCUARTOS(){
     const pronosticos =
       quinielas[usuario]
       ?.fasesFinales
-      ?.DIECISEISAVOS
+      ?.CUARTOS
       ?.pronosticos || [];
 
     pronosticos.forEach((p)=>{
@@ -1479,7 +1498,7 @@ async function calcularRankingSEMIFINAL(){
     const pronosticos =
       quinielas[usuario]
       ?.fasesFinales
-      ?.DIECISEISAVOS
+      ?.SEMIFINAL
       ?.pronosticos || [];
 
     pronosticos.forEach((p)=>{
@@ -1578,7 +1597,7 @@ async function calcularRankingTERCERLUGAR(){
     const pronosticos =
       quinielas[usuario]
       ?.fasesFinales
-      ?.DIECISEISAVOS
+      ?.TERCERLUGAR
       ?.pronosticos || [];
 
     pronosticos.forEach((p)=>{
@@ -1677,7 +1696,7 @@ async function calcularRankingFINAL(){
     const pronosticos =
       quinielas[usuario]
       ?.fasesFinales
-      ?.DIECISEISAVOS
+      ?.FINAL
       ?.pronosticos || [];
 
     pronosticos.forEach((p)=>{
@@ -1871,7 +1890,21 @@ async function borrarRanking(){
   );
 
 }
+async function borrarRankingFases(){
 
+  await firebaseSet(
+    firebaseRef(
+      db,
+      'rankingFases'
+    ),
+    null
+  );
+
+  alert(
+    '🔥 Ranking de fases eliminado'
+  );
+
+}
 async function borrarQuinielas(){
 
   await firebaseSet(
@@ -1949,6 +1982,8 @@ async function borrarUsuario(){
   );
 
 }
+
+
 
 /* =========================================
    FIREBASE

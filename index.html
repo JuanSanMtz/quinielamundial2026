@@ -331,7 +331,7 @@ Grupo A
   <option value="OCTAVOS">OCTAVOS</option>
   <option value="CUARTOS">CUARTOS</option>
   <option value="SEMIFINAL">SEMIFINAL</option>
-  <option value="TERCER_LUGAR">TERCER LUGAR</option>
+  <option value="TERCERLUGAR">TERCER LUGAR</option>
   <option value="FINAL">FINAL</option>
 </select>
 
@@ -885,7 +885,7 @@ async function cargarFasesFinales(){
   'OCTAVOS',
   'CUARTOS',
   'SEMIFINAL',
-  'TERCER_LUGAR',
+  'TERCERLUGAR',
   'FINAL'
 ];
 
@@ -911,7 +911,7 @@ async function cargarFasesFinales(){
     html += `
 
     <div class="fase-label">
-      🏆 ${fase.replace('DIECISEISAVOS','16AVOS DE FINAL').replace('TERCER_LUGAR','TERCER LUGAR')}
+      🏆 ${fase.replace('DIECISEISAVOS','16AVOS DE FINAL').replace('TERCERLUGAR','TERCER LUGAR')}
     </div>
 
     `;
@@ -1005,7 +1005,7 @@ console.log("pronosticosGuardados:", pronosticosGuardados);
   html += `
 
   <div class="grupo-bloqueado">
-    🔒 ${fase.replace('DIECISEISAVOS','16AVOS DE FINAL').replace('TERCER_LUGAR','TERCER LUGAR')} guardado
+    🔒 ${fase.replace('DIECISEISAVOS','16AVOS DE FINAL').replace('TERCERLUGAR','TERCER LUGAR')} guardado
   </div>
 
   `;
@@ -1176,7 +1176,7 @@ async function obtenerFaseActual(){
     "OCTAVOS",
     "CUARTOS",
     "SEMIFINAL",
-    "TERCER_LUGAR",
+    "TERCERLUGAR",
     "FINAL"
   ];
 
@@ -1350,7 +1350,95 @@ console.log("Fase actual:", faseActual);
   }
 
 }
+async function cargarRankingFase(nombreFase,idHtml){
 
+  try{
+
+    const res = await fetch(
+      `https://quiniela-mundial-juansantos-default-rtdb.firebaseio.com/rankingFases/${nombreFase}.json`
+    );
+
+    const data = await res.json();
+
+    if(!data){
+
+      document.getElementById(idHtml).innerHTML =
+        "Sin resultados todavía.";
+
+      return;
+
+    }
+
+    const ranking =
+      Object.values(data);
+
+    ranking.sort((a,b)=>{
+
+      if(b.puntos !== a.puntos){
+
+        return b.puntos-a.puntos;
+
+      }
+
+      return b.exactos-a.exactos;
+
+    });
+
+    let html="";
+
+    let posicion=0;
+
+    ranking.forEach((r,i)=>{
+
+      if(
+        i===0 ||
+        r.puntos!==ranking[i-1].puntos ||
+        r.exactos!==ranking[i-1].exactos
+      ){
+
+        posicion=i+1;
+
+      }
+
+      let emoji="🏅";
+
+      if(posicion===1) emoji="🥇";
+      else if(posicion===2) emoji="🥈";
+      else if(posicion===3) emoji="🥉";
+
+      html+=`
+
+      <div class="ranking-item">
+
+        <div>
+
+          ${emoji} ${r.usuario}
+
+        </div>
+
+        <div>
+
+          ${r.puntos}
+          &nbsp;&nbsp;
+          ${r.exactos}
+
+        </div>
+
+      </div>
+
+      `;
+
+    });
+
+    document.getElementById(idHtml).innerHTML=html;
+
+  }catch(e){
+
+    console.error(e);
+
+  }
+
+}
 async function cargarMisResultados(){
 
   const usuario =
@@ -1535,7 +1623,7 @@ async function cargarMisResultados(){
   'OCTAVOS',
   'CUARTOS',
   'SEMIFINAL',
-  'TERCER_LUGAR',
+  'TERCERLUGAR',
   'FINAL'
 ];
 
@@ -1641,7 +1729,7 @@ async function cargarMisResultados(){
       <tr class="${clase}">
 
         <td>
-          (${fase.replace('DIECISEISAVOS','16AVOS DE FINAL').replace('TERCER_LUGAR','TERCER LUGAR')})
+          (${fase.replace('DIECISEISAVOS','16AVOS DE FINAL').replace('TERCERLUGAR','TERCER LUGAR')})
           ${p.local} vs ${p.visitante}
         </td>
 
@@ -1849,6 +1937,36 @@ window.onload = ()=>{
   }
 
   cargarRanking();
+
+  cargarRankingFase(
+  "DIECISEISAVOS",
+  "rankingFase2"
+);
+
+cargarRankingFase(
+  "OCTAVOS",
+  "rankingFase3"
+);
+
+cargarRankingFase(
+  "CUARTOS",
+  "rankingFase4"
+);
+
+cargarRankingFase(
+  "SEMIFINAL",
+  "rankingFase5"
+);
+
+cargarRankingFase(
+  "TERCERLUGAR",
+  "rankingFase6"
+);
+
+cargarRankingFase(
+  "FINAL",
+  "rankingFase7"
+);
 
 };
 
